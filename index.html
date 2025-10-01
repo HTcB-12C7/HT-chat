@@ -91,25 +91,72 @@
                 </div>
                 <div class="content">
                     <div class="container">
-                        <h2>逝世聊天</h2>
-<title>HTc 聊天室</title> 
-						<style> #chat-box { 
-	width: 400px; height: 300px; border: 1px solid #ccc; overflow-y: auto; margin-bottom: 10px; padding: 5px;} 
-						</style>
-HTc 实时聊天室
-发送 
-						<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script> 
-						<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script> 
-						<script> // 替换成你在控制台复制的配置 const firebaseConfig = { apiKey: "你的APIKEY", authDomain: "xxxx.firebaseapp.com", databaseURL: "https://xxxx.firebaseio.com", projectId: "xxxx", storageBucket: "xxxx.appspot.com", messagingSenderId: "xxxx", appId: "xxxx" }; 
-							// 初始化 Firebase const app = firebase.initializeApp(firebaseConfig); 
-							const db = firebase.database(); const chatBox = document.getElementById("chat-box"); const msgInput = document.getElementById("msg");
-							// 监听数据库里的消息 
-							firebase.database().ref("messages").on("child_added", (snapshot) => { const msg = snapshot.val(); chatBox.innerHTML += `${msg}`; 
-		chatBox.scrollTop = chatBox.scrollHeight; });
-		// 发送消息 function sendMsg() { const text = msgInput.value.trim(); 
-		if (text) { firebase.database().ref("messages").push(text); msgInput.value = ""; } 
-		} 
-		</script>
+
+<h2>HT 逝世聊天</h2>
+<div id="chat-box" style="
+  width:100%; 
+  height:300px; 
+  border:1px solid #ccc; 
+  overflow-y:auto; 
+  margin-bottom:10px; 
+  padding:5px;
+  background:#fff;
+"></div>
+<input type="text" id="msg" placeholder="输入消息..." style="width:70%;" />
+<button onclick="sendMsg()">发送</button>
+
+<!-- Firebase 模块化 SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  // ✅ 你的 Firebase 配置
+  const firebaseConfig = {
+    apiKey: "AIzaSyCDKAAxNpKqcSsS2onwlKANl9tLmCy6UGo",
+    authDomain: "ht-chat-91e5f.firebaseapp.com",
+    databaseURL: "https://ht-chat-91e5f-default-rtdb.firebaseio.com",
+    projectId: "ht-chat-91e5f",
+    storageBucket: "ht-chat-91e5f.firebasestorage.app",
+    messagingSenderId: "325331727527",
+    appId: "1:325331727527:web:d994b7241a7cc28e9dd782",
+    measurementId: "G-VYV13LWP14"
+  };
+
+  // 初始化
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const messagesRef = ref(db, "messages");
+
+  const chatBox = document.getElementById("chat-box");
+  const msgInput = document.getElementById("msg");
+
+  // ✅ 进入页面时要求输入昵称
+  let username = "";
+  while (!username) {
+    username = prompt("请输入你的昵称：");
+  }
+
+  // 监听消息
+  onChildAdded(messagesRef, (snapshot) => {
+    const msgData = snapshot.val();
+    const time = new Date(msgData.time).toLocaleTimeString();
+    chatBox.innerHTML += `<div><b>[${time}] ${msgData.user}:</b> ${msgData.text}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+
+  // 发送消息
+  window.sendMsg = function () {
+    const text = msgInput.value.trim();
+    if (text) {
+      push(messagesRef, {
+        user: username,
+        text: text,
+        time: Date.now()
+      });
+      msgInput.value = "";
+    }
+  }
+</script>
 
                     </div>
                 </div>
