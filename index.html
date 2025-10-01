@@ -156,6 +156,19 @@
   </button>
 </div>
 
+<script>
+  // ✅ 按下按钮时放大+亮光
+  const sendBtn = document.querySelector("button[onclick='sendMsg()']");
+  sendBtn.addEventListener("mousedown", () => {
+    sendBtn.style.transform = "scale(1.1)";
+    sendBtn.style.boxShadow = "0 0 20px orange";
+  });
+  sendBtn.addEventListener("mouseup", () => {
+    sendBtn.style.transform = "scale(1)";
+    sendBtn.style.boxShadow = "0 0 10px gold";
+  });
+</script>
+						
 <!-- Firebase 模块化 SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
