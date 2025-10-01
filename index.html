@@ -18,40 +18,41 @@
 }
 
 /* 聊天框样式 */
+/* 聊天框整体背景 */
 #chat-box {
   width: 100%;
-  height: 80vh;              /* 放大，高度占屏幕 80% */
+  height: 80vh;              /* 占页面大部分高度 */
   border: 1px solid #ccc;
   overflow-y: auto;
   margin-bottom: 10px;
   padding: 10px;
-  background: orange;        /* ✅ 背景改成橙色 */
-  color: brown;
+  background: saddlebrown;   /* ✅ 改成棕色背景 */
   display: flex;
   flex-direction: column;
 }
 
 /* 消息基础样式 */
 .message {
-  margin: 5px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  max-width: 60%;
+  margin: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 65%;
   word-wrap: break-word;
+  font-size: 15px;
 }
 
-/* 别人发的消息（左边） */
+/* 别人发的消息 → 橙色 */
 .message.other {
   align-self: flex-start;
-  background: #fff3e0;   /* 浅橙色气泡 */
-  color: #000;
+  background: orange;
+  color: black;
 }
 
-/* 我发的消息（右边） */
+/* 我发的消息 → 蓝色 */
 .message.me {
   align-self: flex-end;
-  background: #ffe0b2;   /* 深一点的橙色气泡 */
-  color: #000;
+  background: deepskyblue;
+  color: white;
   text-align: right;
 }
 	
