@@ -156,6 +156,14 @@
       msgInput.value = "";
     }
   }
+	// ✅ 回车自动发送
+msgInput.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); // 防止换行
+    sendMsg();
+  }
+});
+
 </script>
 
                     </div>
