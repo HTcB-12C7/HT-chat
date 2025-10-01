@@ -109,7 +109,7 @@
 <!-- Firebase 模块化 SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+  import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
   // ✅ 你的 Firebase 配置
   const firebaseConfig = {
@@ -137,12 +137,30 @@
     username = prompt("请输入你的昵称：");
   }
 
+  // ✅ 自动清理旧消息（超过270条 → 删除前200条）
+  async function cleanupMessages() {
+    const snapshot = await get(messagesRef);
+    if (snapshot.exists()) {
+      const allMessages = snapshot.val();
+      const keys = Object.keys(allMessages);
+
+      if (keys.length > 270) {
+        const oldKeys = keys.slice(0, 200); // 最早的200条
+        oldKeys.forEach((key) => {
+          remove(ref(db, "messages/" + key));
+        });
+      }
+    }
+  }
+
   // 监听消息
   onChildAdded(messagesRef, (snapshot) => {
     const msgData = snapshot.val();
     const time = new Date(msgData.time).toLocaleTimeString();
     chatBox.innerHTML += `<div><b>[${time}] ${msgData.user}:</b> ${msgData.text}</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    cleanupMessages(); // ✅ 每次有新消息时执行清理
   });
 
   // 发送消息
@@ -157,13 +175,14 @@
       msgInput.value = "";
     }
   }
-	// ✅ 回车自动发送
-msgInput.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
-    event.preventDefault(); // 防止换行
-    sendMsg();
-  }
-});
+
+  // ✅ 回车自动发送
+  msgInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); // 防止换行
+      sendMsg();
+    }
+  });
 
 </script>
 
