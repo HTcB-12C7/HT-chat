@@ -21,14 +21,15 @@
 /* 聊天框整体背景 */
 #chat-box {
   width: 100%;
-  height: 80vh;              /* 占页面大部分高度 */
-  border: 1px solid #ccc;
+  height: 85vh;              /* 占页面高度 85%，更长 */
+  border: 2px solid #333;
   overflow-y: auto;
   margin-bottom: 10px;
-  padding: 10px;
-  background: saddlebrown;   /* ✅ 改成棕色背景 */
+  padding: 15px;
+  background: saddlebrown;   /* ✅ 棕色背景 */
   display: flex;
   flex-direction: column;
+  font-size: 16px;           /* 字体大一点 */
 }
 
 /* 消息基础样式 */
@@ -133,16 +134,7 @@
                     <div class="container">
 
 <h2>HT 逝世聊天</h2>
-<div id="chat-box" style="
-  width:100%; 
-  height:300px; 
-  border:1px solid #ccc; 
-  overflow-y:auto; 
-  margin-bottom:10px; 
-  padding:5px;
-  background:saddlebrown;  /* ✅ 改成棕色 */
-  color:brown;
-"></div>
+<div id="chat-box"></div>
 
 <div style="display: flex; width: 100%; gap: 5px;">
   <input type="text" id="msg" placeholder="输入消息..." 
