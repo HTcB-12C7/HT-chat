@@ -92,9 +92,24 @@
                 <div class="content">
                     <div class="container">
                         <h2>逝世聊天</h2>
-                        	<iframe src="https://outlook.live.com/mail/" 
-        					style="border: none;">
-							</iframe>
+<title>HTc 聊天室</title> 
+						<style> #chat-box { 
+	width: 400px; height: 300px; border: 1px solid #ccc; overflow-y: auto; margin-bottom: 10px; padding: 5px;} 
+						</style>
+HTc 实时聊天室
+发送 
+						<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script> 
+						<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script> 
+						<script> // 替换成你在控制台复制的配置 const firebaseConfig = { apiKey: "你的APIKEY", authDomain: "xxxx.firebaseapp.com", databaseURL: "https://xxxx.firebaseio.com", projectId: "xxxx", storageBucket: "xxxx.appspot.com", messagingSenderId: "xxxx", appId: "xxxx" }; 
+							// 初始化 Firebase const app = firebase.initializeApp(firebaseConfig); 
+							const db = firebase.database(); const chatBox = document.getElementById("chat-box"); const msgInput = document.getElementById("msg");
+							// 监听数据库里的消息 
+							firebase.database().ref("messages").on("child_added", (snapshot) => { const msg = snapshot.val(); chatBox.innerHTML += `${msg}`; 
+		chatBox.scrollTop = chatBox.scrollHeight; });
+		// 发送消息 function sendMsg() { const text = msgInput.value.trim(); 
+		if (text) { firebase.database().ref("messages").push(text); msgInput.value = ""; } 
+		} 
+		</script>
 
                     </div>
                 </div>
