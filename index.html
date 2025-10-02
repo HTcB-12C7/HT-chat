@@ -448,38 +448,31 @@
   };
 
   // 登录状态监听
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("userInfo").style.display = "block";
-      document.getElementById("userPhoto").src = user.photoURL || "assets/HTgovIconV2.png";
+// ✅ 进入页面时要求输入昵称
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-      const userRef = ref(db, "users/" + user.uid);
-      const snapshot = await get(userRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        document.getElementById("userNickname").value = data.nickname || "";
-        document.getElementById("userEmail").value = data.email || user.email || "";
-        document.getElementById("userPayMethod").value = data.payMethod || "";
-        document.getElementById("userPayName").value = data.payName || "";
-        document.getElementById("userPayAccount").value = data.payAccount || "";
-        document.getElementById("userPhoto").src = data.avatar || user.photoURL || "assets/login-placeholder.svg";
-        document.getElementById("userPhotoPreview").src = data.avatar || user.photoURL || "assets/login-placeholder.svg";
+let username = ""; // 全局用户名
 
-              // ✅ 登录后自动用昵称
-      username = data.nickname || user.displayName || (user.email ? user.email.split("@")[0] : "匿名用户");
-      }
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // 登录后自动获取昵称
+    const userRef = ref(db, "users/" + user.uid);
+    const snapshot = await get(userRef);
+    if (snapshot.exists() && snapshot.val().nickname) {
+      username = snapshot.val().nickname;
     } else {
-      document.getElementById("loginForm").style.display = "block";
-      document.getElementById("userInfo").style.display = "none";
-      document.getElementById("userPhoto").src = "assets/login-placeholder.svg";
-
-          // ✅ 未登录才 prompt
+      username = user.displayName || (user.email ? user.email.split("@")[0] : "匿名用户");
+    }
+    console.log("✅ 登录用户昵称:", username);
+  } else {
+    // 未登录 → 继续要求输入昵称
     while (!username) {
       username = prompt("请输入你的昵称 (提示：登录后可免输入)：");
     }
-    }
-  });
+    console.log("👤 未登录昵称:", username);
+  }
+});
+
 </script>
 
 </body>
