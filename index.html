@@ -222,10 +222,29 @@
           const msgInput = document.getElementById("msg");
 
           // ✅ 进入页面时要求输入昵称
-          let username = "";
-          while (!username) {
-            username = prompt("请输入你的昵称：");
-          }
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+let username = ""; // 全局用户名
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // 登录后自动获取昵称
+    const userRef = ref(db, "users/" + user.uid);
+    const snapshot = await get(userRef);
+    if (snapshot.exists() && snapshot.val().nickname) {
+      username = snapshot.val().nickname;
+    } else {
+      username = user.displayName || (user.email ? user.email.split("@")[0] : "匿名用户");
+    }
+    console.log("✅ 登录用户昵称:", username);
+  } else {
+    // 未登录 → 继续要求输入昵称
+    while (!username) {
+      username = prompt("请输入你的昵称 (提示：登录后可免输入)：");
+    }
+    console.log("👤 未登录昵称:", username);
+  }
+});
 
           // ✅ 自动清理旧消息
           async function cleanupMessages() {
