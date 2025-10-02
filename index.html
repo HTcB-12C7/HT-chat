@@ -1,7 +1,6 @@
 <!DOCTYPE html>
         <html lang="zh-CN">
         <head>
-			<embed height="50" width="100" src="https://htcb-12c7.github.io/assets/Wake_up_cd.m4a">
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>HT-chat</title>
@@ -60,6 +59,27 @@
 }
 	
 </style>
+<video id="bgm" autoplay loop muted playsinline width="0" height="0">
+  <source src="https://htcb-12c7.github.io/htgov/assets/Wake_up_cd.m4a" type="video/m4a">
+</video>
+
+<script>
+  // 用户点击后解除静音
+function enableBgm() {
+  const bgm = document.getElementById('bgm');
+  if (bgm) {
+    bgm.muted = false;
+    bgm.play().catch(err => console.log("播放失败：", err));
+  }
+}
+
+// 监听整个文档
+document.addEventListener('click', enableBgm, { once: true });
+// 监听键盘按键
+document.addEventListener('keydown', enableBgm, { once: true });
+// 监听触摸（手机用）
+document.addEventListener('touchstart', enableBgm, { once: true });
+</script>
         </head>
         <body>
             <div class="header">
