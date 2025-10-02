@@ -1,364 +1,173 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HT-chat</title>
-  <link rel="stylesheet" href="css/htgov.css" />
-  <style>
-    .logo {
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 60px;
-      width: 60px;
-      object-fit: cover;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    /* 聊天框样式 */
-    #chat-box {
-      width: 95%;              /* ✅ 宽度拉宽，占页面95% */
-      height: 60vh;            /* ✅ 高度缩短到60%视口 */
-      border: 2px solid #333;
-      overflow-y: auto;
-      margin: 10px auto;       /* ✅ 居中显示 */
-      padding: 15px;
-      background: saddlebrown; /* ✅ 棕色背景 */
-      display: flex;
-      flex-direction: column;
-      font-size: 16px;
-      border-radius: 10px;     /* ✅ 圆角更好看 */
-    }
-
-    /* 消息基础样式 */
-    .message {
-      margin: 6px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      max-width: 65%;
-      word-wrap: break-word;
-      font-size: 15px;
-    }
-
-    /* 别人发的消息 → 橙色 */
-    .message.other {
-      align-self: flex-start;
-      background: orange;
-      color: black;
-    }
-
-    /* 我发的消息 → 蓝色 */
-    .message.me {
-      align-self: flex-end;
-      background: deepskyblue;
-      color: white;
-      text-align: right;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <a href="https://htcb-12c7.github.io/">
-      <img class="logo" src="assets/HTgovIconV2.png" alt="返回主页">
-    </a>
-    HT-chat <span></span>
-
-    <!-- Language 按钮 -->
-    <button id="lang-toggle" style="
-      position: absolute;
-      top: 10px;
-      right: 70px;
-      padding: 8px 16px;
-      font-size: 16px;
-      background: black;
-      color: #03a9f4;
-      border: 1px solid #03a9f4;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    ">
-      🌐 Language
-    </button>
-
-    <!-- 头像 + 弹出卡片 -->
-<div class="account-toggle" style="position: absolute; top: 10px; right: 10px;">
-  <img id="userPhoto" src="https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg" alt="头像"
-    style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;"
-    onclick="toggleAccountInfo()" />
-
-  <div class="account-popup" id="accountPopup" style="
-    display: none;
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>HT-chat</title>
+<link rel="stylesheet" href="css/htgov.css" />
+<style>
+.logo {
     position: absolute;
-    top: 45px;
-    right: 0;
-    background: rgba(0,0,0,0.9);
-    padding: 10px 15px;
-    border-radius: 8px;
-    color: white;
-    z-index: 9999;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    white-space: nowrap;
-  ">
+    left: 0;
+    top: 0;
+    height: 60px;
+    width: 60px;
+    object-fit: cover;
+    cursor: pointer;
+    z-index: 10;
+}
 
-    <!-- 未登录显示登录表单 -->
-    <div id="loginForm">
-      <input type="email" id="email" placeholder="邮箱/用户名" style="width: 150px; margin: 3px;" />
-      <input type="password" id="password" placeholder="密码" style="width: 150px; margin: 3px;" />
-      <button id="loginBtn">登录</button>
-      <button id="googleLoginBtn" style="background:#fff; color:#000; margin-top:5px;">使用 Google 登录</button>
-    </div>
+/* 聊天框样式 */
+/* 聊天框整体背景 */
+#chat-box {
+  width: 95%;               /* ✅ 宽度拉宽，占页面95% */
+  height: 60vh;             /* ✅ 高度缩短到60%视口 */
+  border: 2px solid #333;
+  overflow-y: auto;
+  margin: 10px auto;        /* ✅ 居中显示 */
+  padding: 15px;
+  background: saddlebrown;  /* ✅ 棕色背景 */
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  border-radius: 10px;      /* ✅ 圆角更好看 */
+}
 
-    <!-- 登录后显示/修改用户信息 -->
-    <div id="userInfo" style="display:none;">
-      <div>
-        <label>头像：</label>
-        <input type="file" id="updateAvatar" accept="image/*" />
-        <img id="userPhotoPreview" src="https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg"
-             style="width:60px; height:60px; border-radius:50%; margin-top:5px;" />
-      </div>
-      <div><strong>昵称：</strong><input id="userNickname" /></div>
-      <div>
-        <strong>邮箱：</strong>
-        <input id="userEmail" style="width:200px;" />
-        <button id="sendVerifyBtn" style="margin-left:5px;">发送验证邮件</button>
-      </div>
-      <div><strong>支付方式：</strong><input id="userPayMethod" /></div>
-      <div><strong>支付名称：</strong><input id="userPayName" /></div>
-      <div><strong>支付账号：</strong><input id="userPayAccount" /></div>
-      <button id="saveBtn">保存</button>
-      <button id="bindGoogleBtn" style="margin-top:10px; background:#4285F4; color:white;">
-        绑定 Google 账号
-      </button>
-      <button id="logoutBtn">退出登录</button>
-    </div>
-  </div>
+/* 消息基础样式 */
+.message {
+  margin: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 65%;
+  word-wrap: break-word;
+  font-size: 15px;
+}
+
+/* 别人发的消息 → 橙色 */
+.message.other {
+  align-self: flex-start;
+  background: orange;
+  color: black;
+}
+
+/* 我发的消息 → 蓝色 */
+.message.me {
+  align-self: flex-end;
+  background: deepskyblue;
+  color: white;
+  text-align: right;
+}
+	
+</style>
+        </head>
+        <body>
+            <div class="header">
+                <a href="https://htcb-12c7.github.io/">
+                    <img class="logo" src="
+						assets/HTgovIconV2.png" alt="返回主页">
+                </a>
+                HT-chat <span></span>
+                
+                <!-- Language 按钮 -->
+                <button id="lang-toggle" style="
+                    position: absolute;
+                    top: 10px;
+                    right: 70px;
+                    padding: 8px 16px;
+                    font-size: 16px;           /* 字体大小 */
+                    background: black;
+                    color: #03a9f4;
+                    border: 1px solid #03a9f4;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">
+                🌐 Language
+                </button>
+
+                <!-- 头像 + 弹出卡片 -->
+                <div class="account-toggle" style="position: absolute; top: 10px; right: 10px;">
+                  <img
+                    src="assets/HTgovIconV2.png"
+                    alt="头像"
+                    style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;"
+                    onclick="toggleAccountInfo()" />
+                  <div class="account-popup" id="accountPopup" style="
+                    display: none;
+                    position: absolute;
+                    top: 45px;
+                    right: 0;
+                    background: rgba(0,0,0,0.9);
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    color: white;
+                    z-index: 9999;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                    white-space: nowrap; /* ✅ 加这行：防止换行 */">
+                    <div><strong>姓名：</strong>HTc</div>
+                    <div><strong>身份证：</strong>HT10001</div>
+                    <div><strong>银行卡号：</strong>1530 0089 8607 2871</div>
+                    <div><strong>地址：</strong>上海市 徐汇县 川东新区 728弄 黑铁快递柜</div>
+                  </div>
+                </div>
+
+                <!-- Google 翻译语言框（请放在最外面，不嵌套在上面的 div 中） -->
+                <div id="google_translate_element" style="
+                    position: absolute;
+                    top: 50px;
+                    right: 0px;
+                    display: none;
+                    background: rgba(0, 0, 0, 0.8);
+                    padding: 8px;
+                    border-radius: 5px;
+                    z-index: 9999;
+                "></div>
+                    </div>
+
+            <div class="main-container">
+                <div class="sidebar">
+                    <h3>黑铁工作室</h3>
+                    
+                    <ul id="sidebar-nav"></ul>
+                    
+                </div>
+                <div class="content">
+                    <div class="container">
+
+<h2>HT 逝世聊天</h2>
+<div id="chat-box"></div>
+
+<div style="display: flex; width: 100%; gap: 5px;">
+  <input type="text" id="msg" placeholder="输入消息..." 
+    style="flex: 8; padding: 10px; border: 1px solid #aaa; border-radius:5px;
+    background: gold; color: black;" />
+
+  <button onclick="sendMsg()" 
+    style="flex: 2; border: none; border-radius: 5px;
+    background: green; color: black; font-weight: bold; cursor: pointer;">
+    启动/回车
+  </button>
 </div>
 
-<script type="module">
-  fetch("https://htcb-12c7.github.io/htgov/components/account.html")
-    .then(r => r.text())
-    .then(async (html) => {
-      document.getElementById("accountContainer").innerHTML = html;
-      // 等 DOM 插入后再加载逻辑
-      await import("https://htcb-12c7.github.io/htgov/js/auth.js");
-      console.log("✅ account.html + auth.js 已加载");
-    });
+<script>
+  // ✅ 按下按钮时放大+亮光
+  const sendBtn = document.querySelector("button[onclick='sendMsg()']");
+  sendBtn.addEventListener("mousedown", () => {
+    sendBtn.style.transform = "scale(1.1)";
+    sendBtn.style.boxShadow = "0 0 20px orange";
+  });
+  sendBtn.addEventListener("mouseup", () => {
+    sendBtn.style.transform = "scale(1)";
+    sendBtn.style.boxShadow = "0 0 10px gold";
+  });
 </script>
-
-    <!-- Google 翻译语言框 -->
-    <div id="google_translate_element" style="
-      position: absolute;
-      top: 50px;
-      right: 0px;
-      display: none;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 8px;
-      border-radius: 5px;
-      z-index: 9999;
-    "></div>
-  </div>
-
-  <div class="main-container">
-    <div class="sidebar">
-      <h3>黑铁工作室</h3>
-      <ul id="sidebar-nav"></ul>
-    </div>
-
-    <div class="content">
-      <div class="container">
-        <h2>HT 逝世聊天</h2>
-        <div id="chat-box"></div>
-
-        <div style="display: flex; width: 100%; gap: 5px;">
-          <input type="text" id="msg" placeholder="输入消息..."
-            style="flex: 8; padding: 10px; border: 1px solid #aaa; border-radius:5px;
-            background: gold; color: black;" />
-
-          <button onclick="sendMsg()"
-            style="flex: 2; border: none; border-radius: 5px;
-            background: green; color: black; font-weight: bold; cursor: pointer;">
-            启动/回车
-          </button>
-        </div>
-
-        <script>
-          // ✅ 按下按钮时放大+亮光
-          const sendBtn = document.querySelector("button[onclick='sendMsg()']");
-          sendBtn.addEventListener("mousedown", () => {
-            sendBtn.style.transform = "scale(1.1)";
-            sendBtn.style.boxShadow = "0 0 20px orange";
-          });
-          sendBtn.addEventListener("mouseup", () => {
-            sendBtn.style.transform = "scale(1)";
-            sendBtn.style.boxShadow = "0 0 10px gold";
-          });
-        </script>
-
-        <!-- Firebase 模块化 SDK -->
-        <script type="module">
-          import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-          import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-          // ✅ Firebase 配置
-          const firebaseConfig = {
-            apiKey: "AIzaSyCDKAAxNpKqcSsS2onwlKANl9tLmCy6UGo",
-            authDomain: "ht-chat-91e5f.firebaseapp.com",
-            databaseURL: "https://ht-chat-91e5f-default-rtdb.firebaseio.com",
-            projectId: "ht-chat-91e5f",
-            storageBucket: "ht-chat-91e5f.firebasestorage.app",
-            messagingSenderId: "325331727527",
-            appId: "1:325331727527:web:d994b7241a7cc28e9dd782",
-            measurementId: "G-VYV13LWP14"
-          };
-
-          // 初始化
-          const app = initializeApp(firebaseConfig);
-          const db = getDatabase(app);
-          const messagesRef = ref(db, "messages");
-
-          const chatBox = document.getElementById("chat-box");
-          const msgInput = document.getElementById("msg");
-
-          // ✅ 进入页面时要求输入昵称
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-let username = ""; // 全局用户名
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // 登录后自动获取昵称
-    const userRef = ref(db, "users/" + user.uid);
-    const snapshot = await get(userRef);
-    if (snapshot.exists() && snapshot.val().nickname) {
-      username = snapshot.val().nickname;
-    } else {
-      username = user.displayName || (user.email ? user.email.split("@")[0] : "匿名用户");
-    }
-    console.log("✅ 登录用户昵称:", username);
-  } else {
-    // 未登录 → 继续要求输入昵称
-    while (!username) {
-      username = prompt("请输入你的昵称 (提示：登录后可免输入)：");
-    }
-    console.log("👤 未登录昵称:", username);
-  }
-});
-
-          // ✅ 自动清理旧消息
-          async function cleanupMessages() {
-            const snapshot = await get(messagesRef);
-            if (snapshot.exists()) {
-              const allMessages = snapshot.val();
-              const keys = Object.keys(allMessages);
-
-              if (keys.length > 270) {
-                const oldKeys = keys.slice(0, 200); // 最早的200条
-                oldKeys.forEach((key) => {
-                  remove(ref(db, "messages/" + key));
-                });
-              }
-            }
-          }
-
-          // 监听消息
-          onChildAdded(messagesRef, (snapshot) => {
-            const msgData = snapshot.val();
-            const time = new Date(msgData.time).toLocaleTimeString();
-            const isMe = msgData.user === username;
-            const msgClass = isMe ? "me" : "other";
-
-            chatBox.innerHTML += `
-              <div class="message ${msgClass}">
-                <b>[${time}] ${msgData.user}:</b> ${msgData.text}
-              </div>
-            `;
-
-            chatBox.scrollTop = chatBox.scrollHeight;
-            cleanupMessages(); // ✅ 每次有新消息时执行清理
-          });
-
-          // 发送消息
-          window.sendMsg = function () {
-            const text = msgInput.value.trim();
-            if (text) {
-              push(messagesRef, {
-                user: username,
-                text: text,
-                time: Date.now()
-              });
-              msgInput.value = "";
-            }
-          }
-
-          // ✅ 回车自动发送
-          msgInput.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-              event.preventDefault(); // 防止换行
-              sendMsg();
-            }
-          });
-        </script>
-      </div>
-    </div>
-  </div>
-
-  <!-- ✅ Google 语言选择初始化 -->
-  <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'zh-CN',
-        includedLanguages: 'zh-CN,en,ja,ko,fr,es,de,ru',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-      }, 'google_translate_element');
-    }
-  </script>
-
-  <!-- ✅ Google 提供的翻译组件 -->
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-  <!-- ✅ 控制 Language 按钮点击时显示/隐藏语言框 -->
-  <script>
-    window.addEventListener('load', function () {
-      const toggle = document.getElementById("lang-toggle");
-      const box = document.getElementById("google_translate_element");
-      if (toggle && box) {
-        toggle.addEventListener("click", () => {
-          box.style.display = box.style.display === "none" ? "block" : "none";
-        });
-      }
-    });
-  </script>
-
-  <!-- ✅ 头像弹出信息卡片逻辑 -->
-  <script>
-    function toggleAccountInfo() {
-      const popup = document.getElementById('accountPopup');
-      popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-    }
-  </script>
-
-  <!-- 动态加载 nav.html -->
-  <script>
-    fetch("https://htcb-12c7.github.io/htgov/nav/nav.html")
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById("sidebar-nav").innerHTML = html;
-      })
-      .catch(err => console.error("菜单加载失败：", err));
-  </script>
-  <script type="module">
+						
+<!-- Firebase 模块化 SDK -->
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signInWithPopup,
-    GoogleAuthProvider, updateEmail, sendEmailVerification,
-    linkWithPopup, onAuthStateChanged, signOut } 
-    from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getDatabase, ref, set, get } 
-    from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
-    from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+  import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+  // ✅ 你的 Firebase 配置
   const firebaseConfig = {
     apiKey: "AIzaSyCDKAAxNpKqcSsS2onwlKANl9tLmCy6UGo",
     authDomain: "ht-chat-91e5f.firebaseapp.com",
@@ -370,134 +179,121 @@ onAuthStateChanged(auth, async (user) => {
     measurementId: "G-VYV13LWP14"
   };
 
+  // 初始化
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
   const db = getDatabase(app);
-  const storage = getStorage(app);
-  const provider = new GoogleAuthProvider();
+  const messagesRef = ref(db, "messages");
 
-  // 切换弹窗
-  window.toggleAccountInfo = function () {
-    const popup = document.getElementById('accountPopup');
-    popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-  };
+  const chatBox = document.getElementById("chat-box");
+  const msgInput = document.getElementById("msg");
 
-  // 邮箱登录
-  document.getElementById("loginBtn").onclick = async () => {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      alert("登录失败: " + err.message);
-    }
-  };
+  // ✅ 进入页面时要求输入昵称
+  let username = "";
+  while (!username) {
+    username = prompt("请输入你的昵称：");
+  }
 
-  // Google 登录
-  document.getElementById("googleLoginBtn").onclick = async () => {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      alert("Google 登录失败: " + err.message);
-    }
-  };
+  // ✅ 自动清理旧消息（超过270条 → 删除前200条）
+  async function cleanupMessages() {
+    const snapshot = await get(messagesRef);
+    if (snapshot.exists()) {
+      const allMessages = snapshot.val();
+      const keys = Object.keys(allMessages);
 
-  // 绑定 Google
-  document.getElementById("bindGoogleBtn").onclick = async () => {
-    const user = auth.currentUser;
-    if (!user) return alert("请先登录");
-    try {
-      await linkWithPopup(user, provider);
-      alert("Google 账号绑定成功！");
-    } catch (err) {
-      alert("绑定失败: " + err.message);
-    }
-  };
-
-  // 发送验证邮件
-  document.getElementById("sendVerifyBtn").onclick = async () => {
-    const user = auth.currentUser;
-    if (!user) return alert("请先登录");
-    const newEmail = document.getElementById("userEmail").value;
-    try {
-      await updateEmail(user, newEmail);
-      await sendEmailVerification(user);
-      alert("验证邮件已发送！");
-    } catch (err) {
-      alert("发送失败: " + err.message);
-    }
-  };
-
-  // 保存用户信息
-  let newAvatarFile = null;
-  document.getElementById("updateAvatar").addEventListener("change", function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("图片不能超过2MB！");
-      return;
-    }
-    newAvatarFile = file;
-    document.getElementById("userPhotoPreview").src = URL.createObjectURL(file);
-  });
-
-  document.getElementById("saveBtn").onclick = async () => {
-    const user = auth.currentUser;
-    if (!user) return alert("请先登录");
-
-    let avatarURL = document.getElementById("userPhoto").src;
-
-    if (newAvatarFile) {
-      const fileRef = sRef(storage, "avatars/" + user.uid + ".jpg");
-      await uploadBytes(fileRef, newAvatarFile);
-      avatarURL = await getDownloadURL(fileRef);
-      document.getElementById("userPhoto").src = avatarURL;
-    }
-
-    const userRef = ref(db, "users/" + user.uid);
-    await set(userRef, {
-      nickname: document.getElementById("userNickname").value,
-      email: document.getElementById("userEmail").value,
-      payMethod: document.getElementById("userPayMethod").value,
-      payName: document.getElementById("userPayName").value,
-      payAccount: document.getElementById("userPayAccount").value,
-      avatar: avatarURL
-    });
-
-    alert("信息已更新！");
-  };
-
-  // 登出
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth);
-  };
-
-  // 登录状态监听
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("userInfo").style.display = "block";
-      document.getElementById("userPhoto").src = user.photoURL || "assets/HTgovIconV2.png";
-
-      const userRef = ref(db, "users/" + user.uid);
-      const snapshot = await get(userRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        document.getElementById("userNickname").value = data.nickname || "";
-        document.getElementById("userEmail").value = data.email || user.email || "";
-        document.getElementById("userPayMethod").value = data.payMethod || "";
-        document.getElementById("userPayName").value = data.payName || "";
-        document.getElementById("userPayAccount").value = data.payAccount || "";
-        document.getElementById("userPhoto").src = data.avatar || user.photoURL || "assets/login-placeholder.svg";
-        document.getElementById("userPhotoPreview").src = data.avatar || user.photoURL || "assets/login-placeholder.svg";
+      if (keys.length > 270) {
+        const oldKeys = keys.slice(0, 200); // 最早的200条
+        oldKeys.forEach((key) => {
+          remove(ref(db, "messages/" + key));
+        });
       }
-    } else {
-      document.getElementById("loginForm").style.display = "block";
-      document.getElementById("userInfo").style.display = "none";
-      document.getElementById("userPhoto").src = "assets/login-placeholder.svg";
+    }
+  }
+
+  // 监听消息
+  onChildAdded(messagesRef, (snapshot) => {
+    const msgData = snapshot.val();
+    const time = new Date(msgData.time).toLocaleTimeString();
+const isMe = msgData.user === username;
+const msgClass = isMe ? "me" : "other";
+chatBox.innerHTML += `<div class="message ${msgClass}">
+  <b>[${time}] ${msgData.user}:</b> ${msgData.text}
+</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    cleanupMessages(); // ✅ 每次有新消息时执行清理
+  });
+
+  // 发送消息
+  window.sendMsg = function () {
+    const text = msgInput.value.trim();
+    if (text) {
+      push(messagesRef, {
+        user: username,
+        text: text,
+        time: Date.now()
+      });
+      msgInput.value = "";
+    }
+  }
+
+  // ✅ 回车自动发送
+  msgInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); // 防止换行
+      sendMsg();
     }
   });
+
 </script>
 
-</body>
-</html>
+                    </div>
+                </div>
+            </div>
+
+          <!-- ✅ Google 语言选择初始化 -->
+        <script>
+          function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+              pageLanguage: 'zh-CN',
+              includedLanguages: 'zh-CN,en,ja,ko,fr,es,de,ru',
+              layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+          }
+        </script>
+
+        <!-- ✅ Google 提供的翻译组件脚本（只保留一条） -->
+        <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+        <!-- ✅ 控制 Language 按钮点击时显示/隐藏语言框 -->
+        <script>
+          window.addEventListener('load', function () {
+            const toggle = document.getElementById("lang-toggle");
+            const box = document.getElementById("google_translate_element");
+            if (toggle && box) {
+              toggle.addEventListener("click", () => {
+                box.style.display = box.style.display === "none" ? "block" : "none";
+              });
+            }
+          });
+        </script>
+
+        <!-- ✅ 头像弹出信息卡片逻辑 -->
+        <script>
+          function toggleAccountInfo() {
+            const popup = document.getElementById('accountPopup');
+            popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+          }
+        </script>
+
+		 <!-- 动态加载 nav.html -->
+        <script>
+  fetch("https://htcb-12c7.github.io/htgov/nav/nav.html")
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById("sidebar-nav").innerHTML = html;
+    })
+    .catch(err => console.error("菜单加载失败：", err));
+         </script>
+
+        </body>
+        </html>
