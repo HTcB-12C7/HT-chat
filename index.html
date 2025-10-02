@@ -87,12 +87,14 @@
   <div id="accountContainer"></div>
 </div>
 
-<script>
+<script type="module">
   fetch("https://htcb-12c7.github.io/htgov/components/account.html")
     .then(r => r.text())
-    .then(html => {
+    .then(async (html) => {
       document.getElementById("accountContainer").innerHTML = html;
-      import("https://htcb-12c7.github.io/htgov/js/auth.js"); // 加载逻辑
+      // 等 DOM 插入后再加载逻辑
+      await import("https://htcb-12c7.github.io/htgov/js/auth.js");
+      console.log("✅ account.html + auth.js 已加载");
     });
 </script>
 
