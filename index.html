@@ -19,19 +19,20 @@
 
     /* 聊天框样式 */
     #chat-box {
-      width: 95%;
-      height: 60vh;
+      width: 95%;              /* ✅ 宽度拉宽，占页面95% */
+      height: 60vh;            /* ✅ 高度缩短到60%视口 */
       border: 2px solid #333;
       overflow-y: auto;
-      margin: 10px auto;
+      margin: 10px auto;       /* ✅ 居中显示 */
       padding: 15px;
-      background: saddlebrown;  /* ✅ 棕色背景 */
+      background: saddlebrown; /* ✅ 棕色背景 */
       display: flex;
       flex-direction: column;
       font-size: 16px;
-      border-radius: 10px;
+      border-radius: 10px;     /* ✅ 圆角更好看 */
     }
 
+    /* 消息基础样式 */
     .message {
       margin: 6px;
       padding: 10px 14px;
@@ -40,11 +41,15 @@
       word-wrap: break-word;
       font-size: 15px;
     }
+
+    /* 别人发的消息 → 橙色 */
     .message.other {
       align-self: flex-start;
       background: orange;
       color: black;
     }
+
+    /* 我发的消息 → 蓝色 */
     .message.me {
       align-self: flex-end;
       background: deepskyblue;
@@ -54,9 +59,7 @@
   </style>
 </head>
 <body>
-  <!-- ✅ 顶部 header -->
   <div class="header">
-    <!-- 左边LOGO -->
     <a href="https://htcb-12c7.github.io/">
       <img class="logo" src="assets/HTgovIconV2.png" alt="返回主页">
     </a>
@@ -74,141 +77,153 @@
       border: 1px solid #03a9f4;
       border-radius: 5px;
       cursor: pointer;
-      font-weight: bold;">
+      font-weight: bold;
+    ">
       🌐 Language
     </button>
 
-    <!-- 登录头像区域（右上角） -->
-    <div id="accountContainer" style="position:absolute; top:10px; right:10px;"></div>
+    <!-- 头像 + 弹出卡片 -->
+
+
+    <!-- Google 翻译语言框 -->
+    <div id="google_translate_element" style="
+      position: absolute;
+      top: 50px;
+      right: 0px;
+      display: none;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 8px;
+      border-radius: 5px;
+      z-index: 9999;
+    "></div>
   </div>
-
-  <!-- ✅ 加载登录/头像组件 -->
-  <script>
-    fetch("components/account.html")
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById("accountContainer").innerHTML = html;
-        import("/js/auth.js"); // 登录逻辑
-      });
-  </script>
-
-  <!-- Google 翻译语言框 -->
-  <div id="google_translate_element" style="
-    position: absolute;
-    top: 50px;
-    right: 0px;
-    display: none;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 8px;
-    border-radius: 5px;
-    z-index: 9999;
-  "></div>
 
   <div class="main-container">
     <div class="sidebar">
       <h3>黑铁工作室</h3>
       <ul id="sidebar-nav"></ul>
     </div>
+
     <div class="content">
       <div class="container">
         <h2>HT 逝世聊天</h2>
         <div id="chat-box"></div>
 
         <div style="display: flex; width: 100%; gap: 5px;">
-          <input type="text" id="msg" placeholder="输入消息..." 
+          <input type="text" id="msg" placeholder="输入消息..."
             style="flex: 8; padding: 10px; border: 1px solid #aaa; border-radius:5px;
             background: gold; color: black;" />
 
-          <button onclick="sendMsg()" 
+          <button onclick="sendMsg()"
             style="flex: 2; border: none; border-radius: 5px;
             background: green; color: black; font-weight: bold; cursor: pointer;">
             启动/回车
           </button>
         </div>
+
+        <script>
+          // ✅ 按下按钮时放大+亮光
+          const sendBtn = document.querySelector("button[onclick='sendMsg()']");
+          sendBtn.addEventListener("mousedown", () => {
+            sendBtn.style.transform = "scale(1.1)";
+            sendBtn.style.boxShadow = "0 0 20px orange";
+          });
+          sendBtn.addEventListener("mouseup", () => {
+            sendBtn.style.transform = "scale(1)";
+            sendBtn.style.boxShadow = "0 0 10px gold";
+          });
+        </script>
+
+        <!-- Firebase 模块化 SDK -->
+        <script type="module">
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+          import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+          // ✅ Firebase 配置
+          const firebaseConfig = {
+            apiKey: "AIzaSyCDKAAxNpKqcSsS2onwlKANl9tLmCy6UGo",
+            authDomain: "ht-chat-91e5f.firebaseapp.com",
+            databaseURL: "https://ht-chat-91e5f-default-rtdb.firebaseio.com",
+            projectId: "ht-chat-91e5f",
+            storageBucket: "ht-chat-91e5f.firebasestorage.app",
+            messagingSenderId: "325331727527",
+            appId: "1:325331727527:web:d994b7241a7cc28e9dd782",
+            measurementId: "G-VYV13LWP14"
+          };
+
+          // 初始化
+          const app = initializeApp(firebaseConfig);
+          const db = getDatabase(app);
+          const messagesRef = ref(db, "messages");
+
+          const chatBox = document.getElementById("chat-box");
+          const msgInput = document.getElementById("msg");
+
+          // ✅ 进入页面时要求输入昵称
+          let username = "";
+          while (!username) {
+            username = prompt("请输入你的昵称：");
+          }
+
+          // ✅ 自动清理旧消息
+          async function cleanupMessages() {
+            const snapshot = await get(messagesRef);
+            if (snapshot.exists()) {
+              const allMessages = snapshot.val();
+              const keys = Object.keys(allMessages);
+
+              if (keys.length > 270) {
+                const oldKeys = keys.slice(0, 200); // 最早的200条
+                oldKeys.forEach((key) => {
+                  remove(ref(db, "messages/" + key));
+                });
+              }
+            }
+          }
+
+          // 监听消息
+          onChildAdded(messagesRef, (snapshot) => {
+            const msgData = snapshot.val();
+            const time = new Date(msgData.time).toLocaleTimeString();
+            const isMe = msgData.user === username;
+            const msgClass = isMe ? "me" : "other";
+
+            chatBox.innerHTML += `
+              <div class="message ${msgClass}">
+                <b>[${time}] ${msgData.user}:</b> ${msgData.text}
+              </div>
+            `;
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+            cleanupMessages(); // ✅ 每次有新消息时执行清理
+          });
+
+          // 发送消息
+          window.sendMsg = function () {
+            const text = msgInput.value.trim();
+            if (text) {
+              push(messagesRef, {
+                user: username,
+                text: text,
+                time: Date.now()
+              });
+              msgInput.value = "";
+            }
+          }
+
+          // ✅ 回车自动发送
+          msgInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+              event.preventDefault(); // 防止换行
+              sendMsg();
+            }
+          });
+        </script>
       </div>
     </div>
   </div>
 
-  <!-- ✅ 聊天逻辑（Firebase） -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCDKAAxNpKqcSsS2onwlKANl9tLmCy6UGo",
-      authDomain: "ht-chat-91e5f.firebaseapp.com",
-      databaseURL: "https://ht-chat-91e5f-default-rtdb.firebaseio.com",
-      projectId: "ht-chat-91e5f",
-      storageBucket: "ht-chat-91e5f.firebasestorage.app",
-      messagingSenderId: "325331727527",
-      appId: "1:325331727527:web:d994b7241a7cc28e9dd782",
-      measurementId: "G-VYV13LWP14"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const messagesRef = ref(db, "messages");
-
-    const chatBox = document.getElementById("chat-box");
-    const msgInput = document.getElementById("msg");
-
-    // ✅ 输入昵称
-    let username = "";
-    while (!username) {
-      username = prompt("请输入你的昵称：");
-    }
-
-    // ✅ 清理旧消息
-    async function cleanupMessages() {
-      const snapshot = await get(messagesRef);
-      if (snapshot.exists()) {
-        const allMessages = snapshot.val();
-        const keys = Object.keys(allMessages);
-        if (keys.length > 270) {
-          const oldKeys = keys.slice(0, 200);
-          oldKeys.forEach((key) => {
-            remove(ref(db, "messages/" + key));
-          });
-        }
-      }
-    }
-
-    // ✅ 显示消息
-    onChildAdded(messagesRef, (snapshot) => {
-      const msgData = snapshot.val();
-      const time = new Date(msgData.time).toLocaleTimeString();
-      const isMe = msgData.user === username;
-      const msgClass = isMe ? "me" : "other";
-      chatBox.innerHTML += `<div class="message ${msgClass}">
-        <b>[${time}] ${msgData.user}:</b> ${msgData.text}
-      </div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-      cleanupMessages();
-    });
-
-    // ✅ 发送消息
-    window.sendMsg = function () {
-      const text = msgInput.value.trim();
-      if (text) {
-        push(messagesRef, {
-          user: username,
-          text: text,
-          time: Date.now()
-        });
-        msgInput.value = "";
-      }
-    };
-
-    // ✅ 回车发送
-    msgInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        sendMsg();
-      }
-    });
-  </script>
-
-  <!-- Google 翻译组件 -->
+  <!-- ✅ Google 语言选择初始化 -->
   <script>
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
@@ -218,9 +233,11 @@
       }, 'google_translate_element');
     }
   </script>
+
+  <!-- ✅ Google 提供的翻译组件 -->
   <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <!-- Language 按钮逻辑 -->
+  <!-- ✅ 控制 Language 按钮点击时显示/隐藏语言框 -->
   <script>
     window.addEventListener('load', function () {
       const toggle = document.getElementById("lang-toggle");
@@ -231,6 +248,24 @@
         });
       }
     });
+  </script>
+
+  <!-- ✅ 头像弹出信息卡片逻辑 -->
+  <script>
+    function toggleAccountInfo() {
+      const popup = document.getElementById('accountPopup');
+      popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+
+  <!-- 动态加载 nav.html -->
+  <script>
+    fetch("https://htcb-12c7.github.io/htgov/nav/nav.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("sidebar-nav").innerHTML = html;
+      })
+      .catch(err => console.error("菜单加载失败：", err));
   </script>
 </body>
 </html>
