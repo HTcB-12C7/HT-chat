@@ -84,7 +84,6 @@
 
     <!-- 头像 + 弹出卡片 -->
  <div class="account-toggle" style="position: absolute; top: 10px; right: 10px;">
-  <a href="index.html"><img class="logo" src="https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png"></a>
   <div id="accountContainer"></div>
 </div>
 
@@ -93,7 +92,7 @@
     .then(r => r.text())
     .then(html => {
       document.getElementById("accountContainer").innerHTML = html;
-      import("/js/auth.js"); // 加载逻辑
+      import("https://htcb-12c7.github.io/htgov/js/auth.js"); // 加载逻辑
     });
 </script>
 
