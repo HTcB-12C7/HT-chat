@@ -245,36 +245,40 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   const msgInput = document.getElementById("msg");
 
   // ✅ 进入页面时give/get昵称
-// 定义全局昵称
+// 全局昵称和就绪标记
 let username = "";
+let usernameReady = false;
 
-// 监听 Firebase 登录状态
-import { getAuth, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { ref, get } 
-  from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+// 封装一个初始化用户名的方法
+async function initUsername() {
+  const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js");
+  const auth = getAuth(app);
 
-const auth = getAuth(app);
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // ✅ 已登录 → 从数据库读取昵称
-    const userRef = ref(db, "users/" + user.uid);
-    const snapshot = await get(userRef);
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      username = data.nickname || user.email || "匿名用户";
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // ✅ 已登录 → 从数据库读取昵称
+      const userRef = ref(db, "users/" + user.uid);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        username = data.nickname || user.email || "匿名用户";
+      } else {
+        username = user.email || "匿名用户";
+      }
+      console.log("已登录，使用昵称：", username);
     } else {
-      username = user.email || "匿名用户";
+      // ❌ 未登录 → 要求输入昵称
+      while (!username) {
+        username = prompt("请输入你的昵称（未登录需要输入昵称；注册 HTVIP 后就不用每次输入啦 👉 https://htcb-12c7.github.io/htgov/HTVIP/ ）");
+      }
+      console.log("未登录，输入昵称：", username);
     }
-    console.log("已登录，使用昵称：", username);
-  } else {
-    // ❌ 未登录 → 要求输入昵称 + 提示去注册
-    while (!username) {
-      username = prompt("请输入你的昵称（未登录每次都要输入，建议前往 HTVIP 注册：https://htcb-12c7.github.io/htgov/HTVIP/ ）");
-    }
-    console.log("未登录，输入昵称：", username);
-  }
-});
+    usernameReady = true; // 标记完成
+  });
+}
+
+// 立即调用
+initUsername();
 
   // ✅ 自动清理旧消息（超过270条 → 删除前200条）
   async function cleanupMessages() {
@@ -308,17 +312,21 @@ chatBox.innerHTML += `<div class="message ${msgClass}">
   });
 
   // 发送消息
-  window.sendMsg = function () {
-    const text = msgInput.value.trim();
-    if (text) {
-      push(messagesRef, {
-        user: username,
-        text: text,
-        time: Date.now()
-      });
-      msgInput.value = "";
-    }
+window.sendMsg = function () {
+  if (!usernameReady) {
+    alert("昵称还没加载好，请稍等~");
+    return;
   }
+  const text = msgInput.value.trim();
+  if (text) {
+    push(messagesRef, {
+      user: username,
+      text: text,
+      time: Date.now()
+    });
+    msgInput.value = "";
+  }
+}
 
   // ✅ 回车自动发送
   msgInput.addEventListener("keydown", function (event) {
