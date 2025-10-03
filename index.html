@@ -246,7 +246,8 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 
   // ✅ 进入页面时give/get昵称
 // 全局昵称和就绪标记
-let username = "";
+let currentUserId = null;   // 唯一身份 (uid 或 guestId)
+let username = "";          // 昵称
 let usernameReady = false;
 
 // 封装一个初始化用户名的方法
@@ -254,27 +255,31 @@ async function initUsername() {
   const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js");
   const auth = getAuth(app);
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // ✅ 已登录 → 从数据库读取昵称
-      const userRef = ref(db, "users/" + user.uid);
-      const snapshot = await get(userRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        username = data.nickname || user.email || "匿名用户";
-      } else {
-        username = user.email || "匿名用户";
-      }
-      console.log("已登录，使用昵称：", username);
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // 登录 → 用 Firebase UID
+    currentUserId = user.uid;
+
+    const userRef = ref(db, "users/" + user.uid);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      username = data.nickname || user.email || "匿名用户";
     } else {
-      // ❌ 未登录 → 要求输入昵称
-      while (!username) {
-        username = prompt("请输入你的昵称（未登录需要输入昵称；注册 HTVIP 后就不用每次输入啦 👉 https://htcb-12c7.github.io/htgov/HTVIP/ ）");
-      }
-      console.log("未登录，输入昵称：", username);
+      username = user.email || "匿名用户";
     }
-    usernameReady = true; // 标记完成
-  });
+    console.log("已登录，使用昵称：", username, "ID:", currentUserId);
+
+  } else {
+    // 未登录 → 分配 guestId
+    if (!username) {
+      username = prompt("请输入你的昵称（未登录需要输入昵称；注册 HTVIP 后就不用每次输入 👉 https://htcb-12c7.github.io/htgov/HTVIP/ ）");
+    }
+    currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
+    console.log("未登录，输入昵称：", username, "ID:", currentUserId);
+  }
+  usernameReady = true;
+});
 }
 
 // 立即调用
@@ -300,7 +305,7 @@ initUsername();
   onChildAdded(messagesRef, (snapshot) => {
     const msgData = snapshot.val();
     const time = new Date(msgData.time).toLocaleTimeString();
-const isMe = msgData.user === username;
+const isMe = msgData.uid === currentUserId;
 const msgClass = isMe ? "me" : "other";
 chatBox.innerHTML += `<div class="message ${msgClass}">
   <div class="msg-time">${time}</div>
@@ -319,11 +324,12 @@ window.sendMsg = function () {
   }
   const text = msgInput.value.trim();
   if (text) {
-    push(messagesRef, {
-      user: username,
-      text: text,
-      time: Date.now()
-    });
+push(messagesRef, {
+  uid: currentUserId,
+  user: username,
+  text: text,
+  time: Date.now()
+});
     msgInput.value = "";
   }
 }
