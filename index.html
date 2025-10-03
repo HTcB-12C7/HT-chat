@@ -366,7 +366,6 @@ initUsername();
   }
 
 // 监听消息
-// 监听消息
 onChildAdded(messagesRef, (snapshot) => {
   // 📌 在插入之前判断是否在底部
   const wasNearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 50;
@@ -446,14 +445,6 @@ push(messagesRef, {
               });
             }
           });
-        </script>
-
-        <!-- ✅ 头像弹出信息卡片逻辑 -->
-        <script>
-          function toggleAccountInfo() {
-            const popup = document.getElementById('accountPopup');
-            popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-          }
         </script>
 
 		 <!-- 动态加载 nav.html -->
@@ -609,13 +600,15 @@ push(messagesRef, {
         document.getElementById("userPayName").value = data.payName || "";
         document.getElementById("userPayAccount").value = data.payAccount || "";
 
-        document.getElementById("userPhoto").src = data.avatar || user.photoURL || "assets/login-placeholder.svg";
-        document.getElementById("userPhotoPreview").src = data.avatar || user.photoURL || "assets/login-placeholder.svg";
+	const defaultAvatar = "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
+	document.getElementById("userPhoto").src = data.avatar || user.photoURL || defaultAvatar;
+	document.getElementById("userPhotoPreview").src = data.avatar || user.photoURL || defaultAvatar;
+
       }
     } else {
       document.getElementById("loginForm").style.display = "block";
       document.getElementById("userInfo").style.display = "none";
-      document.getElementById("userPhoto").src = "assets/login-placeholder.svg";
+	  document.getElementById("userPhoto").src = defaultAvatar;
     }
   });
 </script>
