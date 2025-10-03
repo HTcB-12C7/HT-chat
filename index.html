@@ -365,20 +365,27 @@ initUsername();
     }
   }
 
-  // 监听消息
-  onChildAdded(messagesRef, (snapshot) => {
-    const msgData = snapshot.val();
-    const time = new Date(msgData.time).toLocaleTimeString();
-const isMe = msgData.uid === currentUserId;
-const msgClass = isMe ? "me" : "other";
-chatBox.innerHTML += `<div class="message ${msgClass}">
-  <div class="msg-time">${time}</div>
-  <div><b>${msgData.user}:</b> ${msgData.text}</div>
-</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
+// 监听消息
+onChildAdded(messagesRef, (snapshot) => {
+  const msgData = snapshot.val();
+  const time = new Date(msgData.time).toLocaleTimeString();
+  const isMe = msgData.uid === currentUserId;
+  const msgClass = isMe ? "me" : "other";
 
-    cleanupMessages(); // ✅ 每次有新消息时执行清理
-  });
+  // 新消息插入
+  chatBox.innerHTML += `<div class="message ${msgClass}">
+    <div class="msg-time">${time}</div>
+    <div><b>${msgData.user}:</b> ${msgData.text}</div>
+  </div>`;
+
+  // ✅ 只有用户原本在底部时，才自动滚动
+  const nearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 50;
+  if (nearBottom) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  cleanupMessages();
+});
 
   // 发送消息
 window.sendMsg = function () {
