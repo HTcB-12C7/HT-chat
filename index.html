@@ -239,6 +239,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   // 初始化
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const onlineUsersRef = ref(db, "onlineUsers");
   const messagesRef = ref(db, "messages");
 
   const chatBox = document.getElementById("chat-box");
@@ -262,6 +263,36 @@ onAuthStateChanged(auth, async (user) => {
 
     const userRef = ref(db, "users/" + user.uid);
     const snapshot = await get(userRef);
+	  
+	function registerOnlineUser() {
+  const userRef = ref(db, "onlineUsers/" + currentUserId);
+  set(userRef, {
+    nickname: username,
+    isLoggedIn: auth.currentUser ? true : false
+  });
+}
+async function checkNicknameConflict() {
+  const snapshot = await get(onlineUsersRef);
+  if (snapshot.exists()) {
+    const users = snapshot.val();
+    for (let uid in users) {
+      if (users[uid].nickname === username && uid !== currentUserId) {
+        if (users[uid].isLoggedIn && !auth.currentUser) {
+          // 你是游客，对方是注册用户 → 强制刷新
+          alert("该昵称已被注册用户使用，请更换昵称！");
+          location.reload();
+          return false;
+        }
+        if (!users[uid].isLoggedIn && auth.currentUser) {
+          // 你是注册用户，对方是游客 → 踢掉游客
+          remove(ref(db, "onlineUsers/" + uid));
+        }
+      }
+    }
+  }
+  return true;
+}
+
     if (snapshot.exists()) {
       const data = snapshot.val();
       username = data.nickname || user.email || "匿名用户";
@@ -278,8 +309,20 @@ onAuthStateChanged(auth, async (user) => {
     currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
     console.log("未登录，输入昵称：", username, "ID:", currentUserId);
   }
+// 原来是直接 usernameReady = true;
+if (await checkNicknameConflict()) {
+  registerOnlineUser();
   usernameReady = true;
+}
+
 });
+onValue(ref(db, "onlineUsers/" + currentUserId), (snapshot) => {
+  if (!snapshot.exists()) {
+    alert("你的昵称已被注册用户占用，请更换昵称！");
+    location.reload();
+  }
+});
+
 }
 
 // 立即调用
