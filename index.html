@@ -324,7 +324,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     // 未登录 → 分配 guestId
     if (!username) {
-      username = prompt("请输入你的昵称（注册 HTVIP 后就不用每次输入 👉 ）");
+      username = prompt("请输入你的昵称（注册 HTVIP 后就不用每次输入 👈导航栏：黑铁VIP注册 ）");
     }
     currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
     console.log("未登录，输入昵称：", username, "ID:", currentUserId);
