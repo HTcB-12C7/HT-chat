@@ -222,8 +222,8 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 <!-- Firebase 模块化 SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
+import { getDatabase, ref, push, onChildAdded, get, remove, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+	
   // ✅ 你的 Firebase 配置
   const firebaseConfig = {
     apiKey: "AIzaSyCDKAAxNpKqcSsS2onwlKANl9tLmCy6UGo",
@@ -280,11 +280,12 @@ async function checkNicknameConflict() {
 let currentUserId = null;   // 唯一身份 (uid 或 guestId)
 let username = "";          // 昵称
 let usernameReady = false;
-	
+
+let auth = null;  // 提前声明	
 // 封装一个初始化用户名的方法
 async function initUsername() {
   const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js");
-  const auth = getAuth(app);
+  auth = getAuth(app);  // ✅ 给全局变量赋值
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
