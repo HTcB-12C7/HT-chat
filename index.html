@@ -244,11 +244,37 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   const chatBox = document.getElementById("chat-box");
   const msgInput = document.getElementById("msg");
 
-  // ✅ 进入页面时要求输入昵称
-  let username = "";
-  while (!username) {
-    username = prompt("请输入你的昵称：");
+  // ✅ 进入页面时give/get昵称
+// 定义全局昵称
+let username = "";
+
+// 监听 Firebase 登录状态
+import { getAuth, onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { ref, get } 
+  from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+const auth = getAuth(app);
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // ✅ 已登录 → 从数据库读取昵称
+    const userRef = ref(db, "users/" + user.uid);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      username = data.nickname || user.email || "匿名用户";
+    } else {
+      username = user.email || "匿名用户";
+    }
+    console.log("已登录，使用昵称：", username);
+  } else {
+    // ❌ 未登录 → 要求输入昵称 + 提示去注册
+    while (!username) {
+      username = prompt("请输入你的昵称（未登录每次都要输入，建议前往 HTVIP 注册：https://htcb-12c7.github.io/htgov/HTVIP/ ）");
+    }
+    console.log("未登录，输入昵称：", username);
   }
+});
 
   // ✅ 自动清理旧消息（超过270条 → 删除前200条）
   async function cleanupMessages() {
