@@ -251,26 +251,6 @@ let currentUserId = null;   // 唯一身份 (uid 或 guestId)
 let username = "";          // 昵称
 let usernameReady = false;
 
-// 封装一个初始化用户名的方法
-async function initUsername() {
-  const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js");
-  const auth = getAuth(app);
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // 登录 → 用 Firebase UID
-    currentUserId = user.uid;
-
-    const userRef = ref(db, "users/" + user.uid);
-    const snapshot = await get(userRef);
-	  
-	function registerOnlineUser() {
-  const userRef = ref(db, "onlineUsers/" + currentUserId);
-  set(userRef, {
-    nickname: username,
-    isLoggedIn: auth.currentUser ? true : false
-  });
-}
 async function checkNicknameConflict() {
   const snapshot = await get(onlineUsersRef);
   if (snapshot.exists()) {
@@ -291,6 +271,27 @@ async function checkNicknameConflict() {
     }
   }
   return true;
+}
+	
+// 封装一个初始化用户名的方法
+async function initUsername() {
+  const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js");
+  const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // 登录 → 用 Firebase UID
+    currentUserId = user.uid;
+
+    const userRef = ref(db, "users/" + user.uid);
+    const snapshot = await get(userRef);
+	  
+	function registerOnlineUser() {
+  const userRef = ref(db, "onlineUsers/" + currentUserId);
+  set(userRef, {
+    nickname: username,
+    isLoggedIn: auth.currentUser ? true : false
+  });
 }
 
     if (snapshot.exists()) {
