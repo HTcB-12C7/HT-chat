@@ -57,7 +57,11 @@
   color: white;
   text-align: right;
 }
-	
+.msg-time {
+  font-size: 12px;   /* 时间变小 */
+  color: black;      /* 时间黑色 */
+  margin-bottom: 2px;/* 和昵称有一点间距 */
+}	
 </style>
 <audio id="bgm" autoplay loop muted playsinline width="0" height="0">
   <source src="https://htcb-12c7.github.io/htgov/assets/Wake_up_cd.m4a" type="audio/mp4">
@@ -237,7 +241,8 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 const isMe = msgData.user === username;
 const msgClass = isMe ? "me" : "other";
 chatBox.innerHTML += `<div class="message ${msgClass}">
-  <b>[${time}] ${msgData.user}:</b> ${msgData.text}
+  <div class="msg-time">${time}</div>
+  <div><b>${msgData.user}:</b> ${msgData.text}</div>
 </div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
