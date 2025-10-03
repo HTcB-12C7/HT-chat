@@ -193,17 +193,6 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 
 <h2>HT 逝世聊天</h2>
 <div id="chat-box"></div>
-
-<div style="display: flex; width: 100%; gap: 5px;">
-  <input type="text" id="msg" placeholder="输入消息..." 
-    style="flex: 8; padding: 10px; border: 1px solid #aaa; border-radius:5px;
-    background: gold; color: black;" />
-
-  <button onclick="sendMsg()" 
-    style="flex: 2; border: none; border-radius: 5px;
-    background: green; color: black; font-weight: bold; cursor: pointer;">
-    启动/回车
-  </button>
 	<!-- ✅ 使用须知 -->
 <div id="chat-rules" style="
   margin-top: 10px;
@@ -222,6 +211,16 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   4. <span style="color:red;">骂脏话</span> → <span style="color:orange;">销户</span><br>
   5. 非黑铁工作室成员使用 <b>HT</b>、<b>黑铁</b>、<b>任意职位</b> → <span style="color:red;">销户</span>
 </div>
+<div style="display: flex; width: 100%; gap: 5px;">
+  <input type="text" id="msg" placeholder="输入消息..." 
+    style="flex: 8; padding: 10px; border: 1px solid #aaa; border-radius:5px;
+    background: gold; color: black;" />
+
+  <button onclick="sendMsg()" 
+    style="flex: 2; border: none; border-radius: 5px;
+    background: green; color: black; font-weight: bold; cursor: pointer;">
+    启动/回车
+  </button>
 </div>
 										
 <script>
