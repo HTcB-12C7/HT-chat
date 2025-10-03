@@ -193,6 +193,24 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 
 <h2>HT 逝世聊天</h2>
 <div id="chat-box"></div>
+<!-- ✅ 使用须知 -->
+<div id="chat-rules" style="
+  margin-top: 10px;
+  padding: 10px;
+  background: #222;
+  color: gold;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+">
+  <b>黑铁逝世聊天引水：</b><br>
+  1. 前往 <a href="https://htcb-12c7.github.io/htgov/HTVIP/" target="_blank" style="color: #03a9f4; font-weight:bold;">黑铁VIP页面</a> 注册后可登录 
+     （购买了黑铁商品的注册成为 <span style="color:lime;">VIP</span>，其余注册成为 <span style="color:deepskyblue;">用户</span>）<br>
+  2. 点击右上角头像图标登录，登录后全站同步<br>
+  3. <span style="color:cyan;">刷屏</span> → <span style="color:skyblue;">下雨</span><br>
+  4. <span style="color:red;">骂脏话</span> → <span style="color:orange;">销户</span><br>
+  5. 非黑铁工作室成员使用 <b>HT</b>、<b>黑铁</b>、<b>任意职位</b> → <span style="color:red;">销户</span>
+</div>
 
 <div style="display: flex; width: 100%; gap: 5px;">
   <input type="text" id="msg" placeholder="输入消息..." 
@@ -205,24 +223,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     启动/回车
   </button>
 </div>
-<!-- ✅ 使用须知 -->
-<div id="chat-rules" style="
-  margin-top: 10px;
-  padding: 10px;
-  background: #222;
-  color: gold;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.6;
-">
-  <b>黑铁逝世聊天引水：</b><br>
-  1. 前往 <a href="https://htcb-12c7.github.io/htgov/HTVIP/" target="_blank" style="color: #03a9f4; font-weight:bold;">黑铁VIP注册页面</a> 注册后可登录 
-     （购买了黑铁商品的注册成为 <span style="color:lime;">VIP</span>，其余注册成为 <span style="color:deepskyblue;">用户</span>）<br>
-  2. 点击右上角头像图标登录，登录后全站同步<br>
-  3. <span style="color:cyan;">刷屏</span> → <span style="color:skyblue;">下雨</span><br>
-  4. <span style="color:red;">骂脏话</span> → <span style="color:orange;">销户</span><br>
-  5. 非黑铁工作室成员使用 <b>HT</b>、<b>黑铁</b>、<b>任意职位</b> → <span style="color:red;">销户</span>
-</div>
+
 <script>
   // ✅ 按下按钮时放大+亮光
   const sendBtn = document.querySelector("button[onclick='sendMsg()']");
@@ -278,7 +279,7 @@ async function checkNicknameConflict() {
       if (users[uid].nickname === username && uid !== currentUserId) {
         if (users[uid].isLoggedIn && !auth.currentUser) {
           // 你是游客，对方是注册用户 → 强制刷新
-          alert("该昵称已被黑铁VIP用户使用，请更换昵称！");
+          alert("该昵称已被注册用户使用，请更换昵称！");
           location.reload();
           return false;
         }
@@ -323,7 +324,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     // 未登录 → 分配 guestId
     if (!username) {
-      username = prompt("请输入你的昵称（注册后就不用每次输入 👉<a href="https://htcb-12c7.github.io/htgov/HTVIP/" target="_blank" style="color: #03a9f4; font-weight:bold;">黑铁VIP注册页面</a>）");
+      username = prompt("请输入你的昵称（未登录需要输入昵称；注册 HTVIP 后就不用每次输入 👉 https://htcb-12c7.github.io/htgov/HTVIP/ ）");
     }
     currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
     console.log("未登录，输入昵称：", username, "ID:", currentUserId);
@@ -337,7 +338,7 @@ if (await checkNicknameConflict()) {
 });
 onValue(ref(db, "onlineUsers/" + currentUserId), (snapshot) => {
   if (!snapshot.exists()) {
-    alert("你的昵称已被黑铁VIP用户强制使用，请更换昵称！");
+    alert("你的昵称已被注册用户占用，请更换昵称！");
     location.reload();
   }
 });
@@ -542,8 +543,8 @@ push(messagesRef, {
   document.getElementById("updateAvatar").addEventListener("change", function(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 27 * 1024 * 1024) {
-      alert("图片大小不能超过27MB！");
+    if (file.size > 2 * 1024 * 1024) {
+      alert("图片大小不能超过2MB！");
       return;
     }
     newAvatarFile = file;
