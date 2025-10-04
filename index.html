@@ -241,7 +241,8 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 <!-- Firebase 模块化 SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, get, remove, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, get, remove, set, onValue }
+  from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 	
   // ✅ 你的 Firebase 配置
   const firebaseConfig = {
