@@ -388,21 +388,32 @@ onAuthStateChanged(auth, async (user) => {
 
     console.log("✅ 已登录为:", username);
 } else {
-  // ⚠️ 未登录状态
+  // ⚠️ 未登录状态（游客进入）
   loginForm.style.display = "block";
   userInfo.style.display = "none";
 
-  // 🧩 检查昵称重复
-  const existingUsers = (await get(onlineUsersRef)).val() || {};
-  let tempName = prompt("请输入你的昵称（登录后不需要输入昵称👈导航栏：黑铁VIP注册）") || "游客";
-  const nameExists = Object.values(existingUsers).some(u => u.nickname === tempName);
+  // 🔎 拉取当前在线用户 + 已注册用户，用于昵称检测
+  const [onlineSnap, usersSnap] = await Promise.all([
+    get(onlineUsersRef),
+    get(ref(db, "users"))
+  ]);
+  const onlineUsers = onlineSnap.exists() ? onlineSnap.val() : {};
+  const registeredUsers = usersSnap.exists() ? usersSnap.val() : {};
 
-  if (nameExists) {
-    alert("⚠️ 该昵称已被黑铁VIP用户强占，请更换一个昵称！");
+  // 🧩 输入昵称（游客）
+  let tempName = prompt("请输入你的昵称（游客）")?.trim() || "游客";
+
+  // 🧩 检查是否重复（在线 or 注册）
+  const duplicateOnline = Object.values(onlineUsers).some(u => u.nickname === tempName);
+  const duplicateRegistered = Object.values(registeredUsers).some(u => u.nickname === tempName);
+
+  if (duplicateOnline || duplicateRegistered) {
+    alert("⚠️ 该昵称已被使用（包括注册用户），请更换一个昵称！");
     location.reload(); // 强制刷新重新输入昵称
-    return; // 阻止继续执行
+    return;
   }
 
+  // ✅ 昵称通过检测
   username = tempName;
   currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
   document.getElementById("userPhoto").src = defaultAvatar;
@@ -416,6 +427,8 @@ onAuthStateChanged(auth, async (user) => {
     lastActive: Date.now()
   });
   window.addEventListener("beforeunload", () => remove(guestRef));
+
+  console.log("🟡 游客已加入:", username);
 }
 
 // ✅ 注册在线用户信息
