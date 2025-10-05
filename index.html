@@ -387,14 +387,37 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     console.log("✅ 已登录为:", username);
-  } else {
-    // ⚠️ 未登录状态
-    loginForm.style.display = "block";
-    userInfo.style.display = "none";
-    username = prompt("请输入你的昵称（游客）") || "游客";
-    currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
-    document.getElementById("userPhoto").src = defaultAvatar;
+} else {
+  // ⚠️ 未登录状态
+  loginForm.style.display = "block";
+  userInfo.style.display = "none";
+
+  // 🧩 检查昵称重复
+  const existingUsers = (await get(onlineUsersRef)).val() || {};
+  let tempName = prompt("请输入你的昵称（游客）") || "游客";
+  const nameExists = Object.values(existingUsers).some(u => u.nickname === tempName);
+
+  if (nameExists) {
+    alert("⚠️ 该昵称已被使用，请更换一个昵称！");
+    location.reload(); // 强制刷新重新输入昵称
+    return; // 阻止继续执行
   }
+
+  username = tempName;
+  currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
+  document.getElementById("userPhoto").src = defaultAvatar;
+
+  // ✅ 注册在线游客信息
+  const guestRef = ref(db, "onlineUsers/" + currentUserId);
+  await set(guestRef, {
+    nickname: username,
+    email: "(游客)",
+    realname: "",
+    lastActive: Date.now()
+  });
+  window.addEventListener("beforeunload", () => remove(guestRef));
+}
+
 // ✅ 注册在线用户信息
 if (user) {
   const userRef = ref(db, "onlineUsers/" + user.uid);
