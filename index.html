@@ -288,14 +288,17 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 <!-- Firebase 登录逻辑 -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signInWithPopup,
-    GoogleAuthProvider, updateEmail, sendEmailVerification,
-    linkWithPopup, onAuthStateChanged, signOut } 
-    from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, get, remove, set }
-    from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
-    from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+import {
+  getAuth, signInWithEmailAndPassword, signInWithPopup,
+  GoogleAuthProvider, updateEmail, sendEmailVerification,
+  linkWithPopup, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import {
+  getDatabase, ref, push, onChildAdded, get, remove, set
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import {
+  getStorage, ref as sRef, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
 // ✅ Firebase 配置
 const firebaseConfig = {
@@ -316,7 +319,6 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
-// --- 以下是聊天逻辑 ---
 const chatBox = document.getElementById("chat-box");
 const msgInput = document.getElementById("msg");
 const messagesRef = ref(db, "messages");
@@ -325,27 +327,52 @@ let username = "";
 let currentUserId = "";
 let usernameReady = false;
 
-// 登录状态变化后设置用户名
+// --- 登录状态变化监听 ---
 onAuthStateChanged(auth, async (user) => {
+  const loginForm = document.getElementById("loginForm");
+  const userInfo = document.getElementById("userInfo");
+  const defaultAvatar = "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
+
   if (user) {
+    // ✅ 登录成功
+    loginForm.style.display = "none";
+    userInfo.style.display = "block";
+
     currentUserId = user.uid;
     const userRef = ref(db, "users/" + user.uid);
     const snap = await get(userRef);
+
     if (snap.exists()) {
-      username = snap.val().nickname || user.email;
+      const data = snap.val();
+      username = data.nickname || user.email;
+      document.getElementById("userNickname").value = data.nickname || "";
+      document.getElementById("userEmail").value = data.email || user.email || "";
+      document.getElementById("userPayMethod").value = data.payMethod || "";
+      document.getElementById("userPayName").value = data.payName || "";
+      document.getElementById("userPayAccount").value = data.payAccount || "";
+      document.getElementById("userPhoto").src = data.avatar || user.photoURL || defaultAvatar;
+      document.getElementById("userPhotoPreview").src = data.avatar || user.photoURL || defaultAvatar;
     } else {
-      username = user.email;
+      username = user.email || "匿名用户";
     }
+
+    console.log("✅ 已登录为:", username);
   } else {
-    username = prompt("请输入你的昵称（未登录）");
+    // ⚠️ 未登录状态
+    loginForm.style.display = "block";
+    userInfo.style.display = "none";
+    username = prompt("请输入你的昵称（游客）") || "游客";
     currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
+    document.getElementById("userPhoto").src = defaultAvatar;
   }
+
   usernameReady = true;
 });
 
-// 监听消息
+// --- 监听消息 ---
 onChildAdded(messagesRef, (snapshot) => {
   const msgData = snapshot.val();
+  if (!msgData) return;
   const time = new Date(msgData.time).toLocaleTimeString();
   const isMe = msgData.uid === currentUserId;
   const msgClass = isMe ? "me" : "other";
@@ -359,14 +386,13 @@ onChildAdded(messagesRef, (snapshot) => {
         <div><b>${msgData.user}:</b> ${msgData.text}</div>
       </div>
       ${isMe ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">` : ""}
-    </div>
-  `;
+    </div>`;
   chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// 发送消息
+// --- 发送消息 ---
 window.sendMsg = async function () {
-  if (!usernameReady) return alert("昵称未加载完成");
+  if (!usernameReady) return alert("昵称未加载完成，请稍候~");
   const text = msgInput.value.trim();
   if (!text) return;
 
@@ -378,22 +404,32 @@ window.sendMsg = async function () {
     else if (auth.currentUser.photoURL) avatarURL = auth.currentUser.photoURL;
   }
 
-  push(messagesRef, {
+  await push(messagesRef, {
     uid: currentUserId,
     user: username,
-    text: text,
+    text,
     time: Date.now(),
     avatar: avatarURL
   });
+
   msgInput.value = "";
 };
 
-// --- 以下是登录与头像上传逻辑 ---
+// ✅ 回车发送
+msgInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMsg();
+  }
+});
+
+// --- 登录与上传头像逻辑 ---
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   try {
     await signInWithEmailAndPassword(auth, email, password);
+    alert("登录成功！");
   } catch (e) {
     alert("登录失败：" + e.message);
   }
@@ -406,6 +442,8 @@ document.getElementById("googleLoginBtn").onclick = async () => {
     alert("Google 登录失败：" + e.message);
   }
 };
+
+document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
 let newAvatarFile = null;
 document.getElementById("updateAvatar").addEventListener("change", e => {
