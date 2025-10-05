@@ -398,17 +398,46 @@ onAuthStateChanged(auth, async (user) => {
     get(ref(db, "users"))
   ]);
   const onlineUsers = onlineSnap.exists() ? onlineSnap.val() : {};
+// ✅ 注册在线用户 + 自动心跳（游客或登录用户通用）
+async function registerOnlineUser(user, nickname, isGuest = false) {
+  const id = isGuest ? "guest_" + Math.random().toString(36).substring(2, 10) : user.uid;
+  const userRef = ref(db, "onlineUsers/" + id);
+
+  // 写入在线状态
+  await set(userRef, {
+    nickname,
+    email: isGuest ? "(游客)" : user.email || "",
+    realname: isGuest ? "" : document.getElementById("userPayName")?.value || "",
+    lastActive: Date.now()
+  });
+
+  // 页面关闭或刷新时删除在线状态
+  window.addEventListener("beforeunload", () => remove(userRef));
+
+  // 每 30 秒刷新心跳
+  setInterval(() => {
+    set(userRef, {
+      nickname,
+      email: isGuest ? "(游客)" : user.email || "",
+      realname: isGuest ? "" : document.getElementById("userPayName")?.value || "",
+      lastActive: Date.now()
+    });
+  }, 30000);
+
+  return id;
+}
+
   const registeredUsers = usersSnap.exists() ? usersSnap.val() : {};
 
   // 🧩 输入昵称（游客）
-  let tempName = prompt("请输入你的昵称（游客）")?.trim() || "游客";
+  let tempName = prompt("请输入你的昵称（登录后不需要输入，👈导航栏：黑铁VIP注册）")?.trim() || "游客";
 
   // 🧩 检查是否重复（在线 or 注册）
   const duplicateOnline = Object.values(onlineUsers).some(u => u.nickname === tempName);
   const duplicateRegistered = Object.values(registeredUsers).some(u => u.nickname === tempName);
 
   if (duplicateOnline || duplicateRegistered) {
-    alert("⚠️ 该昵称已被使用（包括注册用户），请更换一个昵称！");
+    alert("⚠️ 该昵称已被黑铁VIP强占，请更换一个昵称！");
     location.reload(); // 强制刷新重新输入昵称
     return;
   }
@@ -482,16 +511,25 @@ import { onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-datab
 const onlineList = document.getElementById("onlineList");
 
 onValue(onlineUsersRef, (snapshot) => {
-  onlineList.innerHTML = ""; // 清空旧列表
+  onlineList.innerHTML = ""; 
+  const now = Date.now();
+  const ACTIVE_TIMEOUT = 72000; // 超过 72 秒未活跃视为离线
+
   if (snapshot.exists()) {
     const users = snapshot.val();
-    Object.keys(users).forEach((uid) => {
-      const u = users[uid];
+    Object.entries(users).forEach(([uid, u]) => {
+      // 自动清理超过 72 秒未活跃的记录
+      if (!u.lastActive || now - u.lastActive > ACTIVE_TIMEOUT) {
+        remove(ref(db, "onlineUsers/" + uid));
+        return;
+      }
+
       const nickname = u.nickname || "(匿名)";
       const email = u.email || "";
       const realname = u.realname || "";
       const isSelf = uid === currentUserId;
       const dot = isSelf ? "🟢" : "🟡";
+
       onlineList.innerHTML += `
         <li style="margin-bottom:8px;">
           ${dot} <b>${nickname}</b><br>
