@@ -241,7 +241,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 <!-- Firebase 模块化 SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, get, remove, set, onValue }
+import { getDatabase, ref, push, onChildAdded, get, remove, set }
   from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 	
   // ✅ 你的 Firebase 配置
@@ -281,7 +281,7 @@ async function checkNicknameConflict() {
       if (users[uid].nickname === username && uid !== currentUserId) {
         if (users[uid].isLoggedIn && !auth.currentUser) {
           // 你是游客，对方是注册用户 → 强制刷新
-          alert("该昵称已被黑铁VIP用户使用，请更换昵称！");
+          alert("该昵称已被黑铁VIP用户强占，请更换昵称！");
           location.reload();
           return false;
         }
@@ -338,13 +338,6 @@ if (await checkNicknameConflict()) {
 }
 
 });
-onValue(ref(db, "onlineUsers/" + currentUserId), (snapshot) => {
-  if (!snapshot.exists()) {
-    alert("你的昵称已被黑铁VIP用户强占，请更换昵称！");
-    location.reload();
-  }
-});
-
 }
 
 // 立即调用
