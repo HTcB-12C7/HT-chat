@@ -20,7 +20,7 @@
 /* 聊天框样式 */
 /* 聊天框整体背景 */
 #chat-box {
-  width: 95%;               /* ✅ 宽度拉宽，占页面95% */
+  width: 111%;               /* ✅ 宽度拉宽，占页面95% */
   height: 60vh;             /* ✅ 高度缩短到60%视口 */
   border: 2px solid #333;
   overflow-y: auto;
@@ -527,8 +527,11 @@ onValue(onlineUsersRef, (snapshot) => {
       const nickname = u.nickname || "(匿名)";
       const email = u.email || "";
       const realname = u.realname || "";
-      const isSelf = uid === currentUserId;
-      const dot = isSelf ? "🟢" : "🟡";
+// ✅ 当前用户显示🟢，其他用户（包括游客）🟡
+let dot = "🟡";
+if (uid === currentUserId) {
+  dot = "🟢";
+}
 
       onlineList.innerHTML += `
         <li style="margin-bottom:8px;">
