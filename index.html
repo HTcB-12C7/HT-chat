@@ -192,7 +192,36 @@ document.addEventListener('touchstart', enableBgm, { once: true });
                     <div class="container">
 
 <h2>HT 逝世聊天</h2>
-<div id="chat-box"></div>
+
+<div id="chat-container" style="display:flex; width:95%; margin:auto; gap:10px;">
+  <!-- ✅ 左侧在线用户列表 -->
+  <div id="online-users" style="
+      width:25%;
+      background:#222;
+      color:gold;
+      border-radius:8px;
+      padding:10px;
+      overflow-y:auto;
+      font-size:14px;
+      height:60vh;
+    ">
+    <b>🟢 在线用户</b>
+    <ul id="onlineList" style="list-style:none; padding:0; margin-top:8px;"></ul>
+  </div>
+
+  <!-- ✅ 右侧聊天框 -->
+  <div id="chat-box" style="
+      flex:1;
+      border:2px solid #333;
+      border-radius:10px;
+      background:saddlebrown;
+      padding:15px;
+      overflow-y:auto;
+      height:60vh;
+      display:flex;
+      flex-direction:column;
+  "></div>
+</div>
 
 <div style="display: flex; width: 100%; gap: 5px;">
   <input type="text" id="msg" placeholder="输入消息..." 
@@ -322,7 +351,8 @@ const provider = new GoogleAuthProvider();
 const chatBox = document.getElementById("chat-box");
 const msgInput = document.getElementById("msg");
 const messagesRef = ref(db, "messages");
-
+const onlineUsersRef = ref(db, "onlineUsers");
+	
 let username = "";
 let currentUserId = "";
 let usernameReady = false;
@@ -365,7 +395,28 @@ onAuthStateChanged(auth, async (user) => {
     currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
     document.getElementById("userPhoto").src = defaultAvatar;
   }
-
+// ✅ 注册在线用户信息
+if (user) {
+  const userRef = ref(db, "onlineUsers/" + user.uid);
+  await set(userRef, {
+    nickname: username,
+    email: user.email || "",
+    realname: document.getElementById("userPayName")?.value || "",
+    lastActive: Date.now()
+  });
+  // 页面关闭或刷新时删除在线状态
+  window.addEventListener("beforeunload", () => remove(userRef));
+} else {
+  const guestId = currentUserId;
+  const guestRef = ref(db, "onlineUsers/" + guestId);
+  await set(guestRef, {
+    nickname: username,
+    email: "(游客)",
+    realname: "",
+    lastActive: Date.now()
+  });
+  window.addEventListener("beforeunload", () => remove(guestRef));
+}
   usernameReady = true;
 });
 
@@ -388,6 +439,33 @@ onChildAdded(messagesRef, (snapshot) => {
       ${isMe ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">` : ""}
     </div>`;
   chatBox.scrollTop = chatBox.scrollHeight;
+});
+// ✅ 监听在线用户变化
+import { onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+const onlineList = document.getElementById("onlineList");
+
+onValue(onlineUsersRef, (snapshot) => {
+  onlineList.innerHTML = ""; // 清空旧列表
+  if (snapshot.exists()) {
+    const users = snapshot.val();
+    Object.keys(users).forEach((uid) => {
+      const u = users[uid];
+      const nickname = u.nickname || "(匿名)";
+      const email = u.email || "";
+      const realname = u.realname || "";
+      const isSelf = uid === currentUserId;
+      const dot = isSelf ? "🟢" : "🟡";
+      onlineList.innerHTML += `
+        <li style="margin-bottom:8px;">
+          ${dot} <b>${nickname}</b><br>
+          <span style="color:#ccc;">${realname}</span><br>
+          <span style="font-size:12px;color:#999;">${email}</span>
+        </li>`;
+    });
+  } else {
+    onlineList.innerHTML = "<li style='color:#aaa;'>暂无用户在线</li>";
+  }
 });
 
 // --- 发送消息 ---
