@@ -475,7 +475,7 @@ push(messagesRef, {
     authDomain: "ht-chat-91e5f.firebaseapp.com",
     databaseURL: "https://ht-chat-91e5f-default-rtdb.firebaseio.com",
     projectId: "ht-chat-91e5f",
- 	storageBucket: "ht-chat-91e5f.appspot.com",
+	storageBucket: "ht-chat-91e5f.firebasestorage.app",
     messagingSenderId: "325331727527",
     appId: "1:325331727527:web:d994b7241a7cc28e9dd782",
     measurementId: "G-VYV13LWP14"
@@ -538,8 +538,8 @@ push(messagesRef, {
   document.getElementById("updateAvatar").addEventListener("change", function(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("图片大小不能超过2MB！");
+    if (file.size > 27 * 1024 * 1024) {
+      alert("图片大小不能超过27MB！");
       return;
     }
     newAvatarFile = file;
