@@ -359,9 +359,7 @@ initUsername();
     }
   }
 
-// 监听消息
 onChildAdded(messagesRef, (snapshot) => {
-  // 📌 在插入之前判断是否在底部
   const wasNearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 50;
 
   const msgData = snapshot.val();
@@ -369,16 +367,24 @@ onChildAdded(messagesRef, (snapshot) => {
   const isMe = msgData.uid === currentUserId;
   const msgClass = isMe ? "me" : "other";
 
-  chatBox.innerHTML += `<div class="message ${msgClass}">
-    <div class="msg-time">${time}</div>
-    <div><b>${msgData.user}:</b> ${msgData.text}</div>
-  </div>`;
+  // ✅ 头像优先顺序：用户数据库头像 → Firebase 登录头像 → 默认头像
+  const avatar =
+    (msgData.avatar && msgData.avatar !== "") ? msgData.avatar :
+    (isMe && auth.currentUser?.photoURL) ? auth.currentUser.photoURL :
+    "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
 
-  // 📌 只要之前在底部，就强制滚动到底
-  if (wasNearBottom) {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
+  // ✅ 消息布局：头像 + 昵称 + 时间 + 内容
+  chatBox.innerHTML += `
+    <div class="message ${msgClass}" style="display:flex;align-items:flex-start;gap:8px;">
+      ${isMe ? "" : `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;border:1px solid #444;">`}
+      <div style="max-width:80%;">
+        <div class="msg-time">${time}</div>
+        <div><b>${msgData.user}:</b> ${msgData.text}</div>
+      </div>
+      ${isMe ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;border:1px solid #444;">` : ""}
+    </div>`;
+    
+  if (wasNearBottom) chatBox.scrollTop = chatBox.scrollHeight;
   cleanupMessages();
 });
 
@@ -390,12 +396,22 @@ window.sendMsg = function () {
   }
   const text = msgInput.value.trim();
   if (text) {
+const avatarURL =
+  auth.currentUser
+    ? (auth.currentUser.photoURL ||
+       (await get(ref(db, "users/" + auth.currentUser.uid)))
+         .val()?.avatar ||
+       "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg")
+    : "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
+
 push(messagesRef, {
   uid: currentUserId,
   user: username,
   text: text,
-  time: Date.now()
+  time: Date.now(),
+  avatar: avatarURL
 });
+
     msgInput.value = "";
   }
 }
