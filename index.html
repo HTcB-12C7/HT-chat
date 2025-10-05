@@ -394,11 +394,11 @@ onAuthStateChanged(auth, async (user) => {
 
   // 🧩 检查昵称重复
   const existingUsers = (await get(onlineUsersRef)).val() || {};
-  let tempName = prompt("请输入你的昵称（游客）") || "游客";
+  let tempName = prompt("请输入你的昵称（登录后不需要输入昵称👈导航栏：黑铁VIP注册）") || "游客";
   const nameExists = Object.values(existingUsers).some(u => u.nickname === tempName);
 
   if (nameExists) {
-    alert("⚠️ 该昵称已被使用，请更换一个昵称！");
+    alert("⚠️ 该昵称已被黑铁VIP用户强占，请更换一个昵称！");
     location.reload(); // 强制刷新重新输入昵称
     return; // 阻止继续执行
   }
@@ -493,7 +493,7 @@ onValue(onlineUsersRef, (snapshot) => {
 
 // --- 发送消息 ---
 window.sendMsg = async function () {
-  if (!usernameReady) return alert("昵称未加载完成，请稍候~");
+  if (!usernameReady) return alert("昵称还未加载完成，请稍候~");
   const text = msgInput.value.trim();
   if (!text) return;
 
