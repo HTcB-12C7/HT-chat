@@ -779,43 +779,6 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
       return;
     }
 
-    // 权限不足提示
-// 权限等级继承机制
-const levelHierarchy = {
-  vip: ["vip"],
-  super: ["vip", "super"],
-  supergod: ["vip", "super", "supergod"],
-  staff: ["vip", "super", "supergod", "staff"]
-};
-
-document.querySelectorAll(".vip-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const level = btn.dataset.level;
-
-    if (userVipLevel === "none") {
-      alert("❗需要购买黑铁商品或赞助此网站成为黑铁VIP。");
-      return;
-    }
-
-    // 检查当前用户是否拥有该权限或更高等级
-    const allowedLevels = levelHierarchy[userVipLevel] || [];
-    if (!allowedLevels.includes(level)) {
-      alert("⚠️ 您当前的VIP权限不足，请升级。");
-      return;
-    }
-
-    // 切换状态
-    if (activeEffect === level) {
-      removeVipEffect();
-      activeEffect = null;
-      alert("🌀 已关闭特效。");
-    } else {
-      removeVipEffect();
-      applyVipEffect(level);
-      activeEffect = level;
-      alert("✨ 特效已开启！");
-    }
-  });
 });
 
     // 切换状态
@@ -829,8 +792,6 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
       activeEffect = level;
       alert("✨ 特效已开启！");
     }
-  });
-});
 
 // 🔹 特效函数
 function applyVipEffect(level) {
@@ -1001,6 +962,7 @@ function removeVipEffect() {
   });
   console.log("🧹 已清除当前特效");
 }
+	  });
 </script>
 
         </body>
