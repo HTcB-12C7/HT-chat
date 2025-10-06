@@ -808,26 +808,87 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
 // 🔹 预留特效函数（你在这里填入具体特效代码）
 function applyVipEffect(level) {
   switch(level) {
-    case "vip":
-      /* ===== 黑铁VIP特效区 ===== */
-      console.log("🍫 启用黑铁VIP炫彩特效");
-      // 👉 在此填入你的炫彩昵称或文字特效HTML
-		  <!DOCTYPE html> <html lang="zh-CN"> <head> <meta charset="UTF-8"> <title>炫酷动效文字</title> <style> @keyframes gradientMove { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } } </style> </head> <body> <p style=" font-size: 48px; font-weight: bold; padding: 20px 30px; margin: 50px auto; display: inline-block; border: 4px solid transparent; border-image: linear-gradient(45deg, saddlebrown, black, orange) 1; border-radius: 12px; background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown); background-size: 600% 600%; color: transparent; background-clip: text; -webkit-background-clip: text; text-shadow: 0 0 10px rgba(139, 69, 19, 0.6), 0 0 20px rgba(255, 140, 0, 0.6); animation: gradientMove 4s linear infinite; "> 🍫</p> </body> </html>
-      break;
+case "vip":
+  console.log("🍫 启用黑铁VIP炫彩特效");
+  const vipStyle = document.createElement("style");
+  vipStyle.textContent = `
+    @keyframes vipGradient {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    .vipEffect {
+      font-size: 48px;
+      font-weight: bold;
+      padding: 20px 30px;
+      display: inline-block;
+      border: 4px solid transparent;
+      border-image: linear-gradient(45deg, saddlebrown, black, orange) 1;
+      border-radius: 12px;
+      background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown);
+      background-size: 600% 600%;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: 0 0 10px rgba(139,69,19,0.6), 0 0 20px rgba(255,140,0,0.6);
+      animation: vipGradient 4s linear infinite;
+    }`;
+  document.head.appendChild(vipStyle);
+  const el = document.createElement("div");
+  el.className = "vipEffect";
+  el.textContent = "🍫 黑铁VIP炫彩模式";
+  document.body.appendChild(el);
+  break;
 
-    case "super":
-      /* ===== 黑铁超级VIP特效区 ===== */
-      console.log("🔥 启用超级VIP服主威压特效");
-      // 👉 在此插入服主威压CSS/HTML代码
-		 <head>   <meta charset="UTF-8">   <title>服主威压文字特效</title>   <style>        .威压 {       font-size: 70px;       font-weight: bold;       color: #ff3c00;       text-shadow:          0 0 10px #ff3c00,         0 0 20px #ff6a00,         0 0 40px #ff0000,         0 0 80px #ff0000;       animation: 压迫 1.2s infinite alternate ease-in-out,                  震动 0.1s infinite linear;     }      @keyframes 压迫 {       0%   { transform: scale(1);   color: #ff3c00; }       50%  { transform: scale(1.2); color: #ff0000; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff6600, 0 0 80px #ff0000; }       100% { transform: scale(1.1); color: #ffa500; }     }      @keyframes 震动 {       0%   { transform: translate(0,0) rotate(0deg); }       25%  { transform: translate(-2px,2px) rotate(-1deg); }       50%  { transform: translate(2px,-2px) rotate(1deg); }       75%  { transform: translate(-1px,1px) rotate(0deg); }       100% { transform: translate(0,0) rotate(0deg); }     }   </style> </head> <body>   <div class="威压">服主威压</div> 
-      break;
+case "super":
+  console.log("🔥 启用超级VIP服主威压特效");
+  const superStyle = document.createElement("style");
+  superStyle.textContent = `
+    .pressure {
+      font-size: 70px;
+      font-weight: bold;
+      color: #ff3c00;
+      text-shadow: 0 0 10px #ff3c00, 0 0 20px #ff6a00, 0 0 40px #ff0000, 0 0 80px #ff0000;
+      animation: pressPulse 1.2s infinite alternate ease-in-out, shake 0.1s infinite linear;
+    }
+    @keyframes pressPulse {
+      0% { transform: scale(1); color: #ff3c00; }
+      50% { transform: scale(1.2); color: #ff0000; }
+      100% { transform: scale(1.1); color: #ffa500; }
+    }
+    @keyframes shake {
+      0% { transform: translate(0,0); }
+      25% { transform: translate(-2px,2px); }
+      50% { transform: translate(2px,-2px); }
+      75% { transform: translate(-1px,1px); }
+      100% { transform: translate(0,0); }
+    }`;
+  document.head.appendChild(superStyle);
+  const press = document.createElement("div");
+  press.className = "pressure";
+  press.textContent = "服主威压";
+  document.body.appendChild(press);
+  break;
 
-    case "supergod":
-      /* ===== 黑铁超级无敌VIP特效区 ===== */
-      console.log("💫 启用超级无敌VIP夏日海滩特效");
-      // 👉 在此插入海滩金光或金币爆炸动画
-		  <style>:root{--sky:#8fd3ff;--sea:#2aa6ff;--sea-deep:#0b5fc3;--sand:#f5d49d;--foam:#ffffffcc;--gold:#ffd76a;--gold-deep:#f3b233;}#chat-box{position:relative;overflow:hidden;background:linear-gradient(to bottom,var(--sky)0%,#bfe7ff 25%,var(--sea)45%,var(--sea-deep)65%,var(--sand)100%);border:3px solid transparent;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:glowBorder 2.8s linear infinite;}@keyframes glowBorder{0%{box-shadow:0 0 0 rgba(0,0,0,0),0 0 20px rgba(255,215,106,.25) inset;}50%{box-shadow:0 0 0 rgba(0,0,0,0),0 0 38px rgba(255,215,106,.45) inset;}100%{box-shadow:0 0 0 rgba(0,0,0,0),0 0 20px rgba(255,215,106,.25) inset;}}#chat-box::before,#chat-box::after{content:"";position:absolute;left:0;width:200%;height:40%;pointer-events:none;}#chat-box::before{bottom:22%;background:radial-gradient(100px 16px at 10% 40%,var(--foam)20%,transparent 55%)repeat-x,radial-gradient(180px 24px at 40% 60%,var(--foam)18%,transparent 60%)repeat-x;background-size:220px 40px,360px 46px;opacity:.9;animation:wave1 6s linear infinite;}@keyframes wave1{from{transform:translateX(0);}to{transform:translateX(-50%);}}#chat-box::after{bottom:36%;background:radial-gradient(120px 12px at 20% 50%,var(--foam)22%,transparent 60%)repeat-x,radial-gradient(220px 18px at 60% 45%,var(--foam)18%,transparent 65%)repeat-x;background-size:260px 30px,420px 34px;opacity:.45;animation:wave2 9s linear infinite;}@keyframes wave2{from{transform:translateX(0);}to{transform:translateX(-50%);}}#chat-box .sand-gloss{position:absolute;inset:auto -20% 0 -20%;height:22%;background:linear-gradient(to top,rgba(255,226,170,.65),rgba(255,226,170,0));pointer-events:none;z-index:0;}#chat-box .sea-gloss{position:absolute;left:-20%;right:-20%;height:18%;bottom:36%;background:radial-gradient(60% 100% at 50% 100%,rgba(255,255,255,.25),transparent 70%);pointer-events:none;z-index:0;}.bubble{position:absolute;bottom:28%;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:inset 0 0 4px #fff;animation:rise 4.2s ease-in infinite;z-index:0;}@keyframes rise{0%{transform:translateY(0)scale(1);opacity:.8;}80%{opacity:.6;}100%{transform:translateY(-140px)scale(1.4);opacity:0;}}#chat-box .message.other{background:rgba(255,255,255,.88);color:#103049;border:1px solid rgba(255,255,255,.6);backdrop-filter:blur(3px);}#chat-box .message.me{background:linear-gradient(135deg,#ffef9c,#ffd76a);color:#5b3900;border:1px solid rgba(255,215,106,.8);box-shadow:0 6px 16px rgba(255,183,0,.25);}.money-pop{position:absolute;left:50%;bottom:24%;transform:translateX(-50%);pointer-events:none;z-index:2;}.coin{position:absolute;font-size:22px;will-change:transform,opacity;animation:coinUp 900ms cubic-bezier(.2,.8,.2,1) forwards,coinSpin 900ms linear infinite;text-shadow:0 2px 4px rgba(0,0,0,.25);}@keyframes coinUp{0%{transform:translate(var(--x,0),0)scale(.8);opacity:0;}10%{opacity:1;}100%{transform:translate(var(--x,0),calc(-140px - var(--yRand,0px)))scale(1.2);opacity:0;}}@keyframes coinSpin{from{filter:drop-shadow(0 0 0 rgba(0,0,0,0));}to{filter:drop-shadow(0 0 0 rgba(0,0,0,0));}}.music-toggle{position:absolute;top:8px;right:8px;z-index:5;background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:700;backdrop-filter:blur(4px);}</style><script>window.addEventListener('load',()=>{const b=document.getElementById('chat-box');if(!b)return;if(!b.querySelector('.sand-gloss')){const g1=document.createElement('div');g1.className='sea-gloss';const g2=document.createElement('div');g2.className='sand-gloss';b.appendChild(g1);b.appendChild(g2);}for(let i=0;i<12;i++){const e=document.createElement('div');e.className='bubble';e.style.left=Math.random()*90+'%';e.style.animationDelay=(Math.random()*4)+'s';e.style.opacity=0.5+Math.random()*0.4;b.appendChild(e);}});function beachMoneyFX(){const b=document.getElementById('chat-box');if(!b)return;const p=document.createElement('div');p.className='money-pop';b.appendChild(p);const a=['🪙','💰','💵','💸','🤑'];const c=14+Math.floor(Math.random()*8);for(let i=0;i<c;i++){const s=document.createElement('span');s.className='coin';s.textContent=a[Math.floor(Math.random()*a.length)];s.style.setProperty('--x',(Math.random()*220-110)+'px');s.style.setProperty('--yRand',(Math.random()*80|0)+'px');s.style.animationDelay=(Math.random()*120|0)+'ms';s.style.left=(Math.random()*80+10)+'%';s.style.fontSize=(18+Math.random()*14)+'px';p.appendChild(s);}setTimeout(()=>p.remove(),1200);}(()=>{const c=document.getElementById('chat-box');if(!c)return;const o=new MutationObserver(m=>{for(const x of m){if(x.type==='childList'&&x.addedNodes.length){const last=[...c.querySelectorAll('.message')].pop();if(last&&last.classList.contains('me'))beachMoneyFX();}}});o.observe(c,{childList:true});})();</script>
-     break;
+case "supergod":
+  console.log("🏖️ 启用超级无敌VIP夏日海滩特效");
+  const beachCSS = document.createElement("style");
+  beachCSS.textContent = `
+    #chat-box {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(to bottom,#8fd3ff 0%,#bfe7ff 25%,#2aa6ff 45%,#0b5fc3 65%,#f5d49d 100%);
+      box-shadow: 0 0 40px rgba(255,215,106,.4) inset;
+      border: 3px solid rgba(255,215,106,.6);
+      border-radius: 14px;
+      animation: glow 3s linear infinite;
+    }
+    @keyframes glow {
+      0%,100%{box-shadow:0 0 25px rgba(255,215,106,.3) inset;}
+      50%{box-shadow:0 0 60px rgba(255,215,106,.6) inset;}
+    }`;
+  document.head.appendChild(beachCSS);
+  break;
+
 
 case "staff":
   console.log("🌧️ 启用黑铁员工权限");
