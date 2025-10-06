@@ -397,7 +397,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
   }
 </script>
-
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 <!-- Firebase 登录逻辑 -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -686,13 +686,14 @@ const text = sanitize(msgInput.value.trim());
     else if (auth.currentUser.photoURL) avatarURL = auth.currentUser.photoURL;
   }
 
-  await push(messagesRef, {
-    uid: currentUserId,
-    user: username,
-    text,
-    time: Date.now(),
-    avatar: avatarURL
-  });
+await push(messagesRef, {
+  uid: currentUserId,
+  user: username,
+  text,
+  time: Date.now(),
+  avatar: avatarURL,
+  vipLevel: activeEffect || userVipLevel || "none" // ✅ 写入当前特效等级
+});
 
   msgInput.value = "";
 };
@@ -884,6 +885,8 @@ function applyVipEffect(level) {
     // 🏖️ 超级无敌VIP：修复后的海滩模式（不卡顿）
 case "supergod":
   const box = document.getElementById("chat-box");
+
+  // --- 样式 ---
   const css = document.createElement("style");
   css.id = "beachCSS";
   css.textContent = `
@@ -922,7 +925,7 @@ case "supergod":
   `;
   document.head.appendChild(css);
 
-  // 🌊 只生成一次泡泡
+  // 🌊 只生成一次泡泡层
   if (!box.querySelector(".bubble")) {
     for (let i = 0; i < 10; i++) {
       const b = document.createElement("div");
@@ -936,7 +939,7 @@ case "supergod":
   // ✅ 防止重复监听
   if (window.superGodObserver) window.superGodObserver.disconnect();
 
-  // 🌴 创建新的 observer
+  // 🌴 新监听器
   window.superGodObserver = new MutationObserver(muts => {
     for (const m of muts) {
       if (m.addedNodes.length) {
@@ -960,32 +963,6 @@ case "supergod":
   });
   window.superGodObserver.observe(box, { childList: true });
   break;
-
-      // 监听我发的消息时放金币动画
-const observer = new MutationObserver(muts => {
-  for (const m of muts) {
-    if (m.addedNodes.length) {
-      const last = [...box.querySelectorAll(".message")].pop();
-      if (last && last.classList.contains("me")) {
-        const pop = document.createElement("div");
-        pop.className = "money-pop";
-        const icons = ["🪙","💰","💵","💸"];
-        for (let i = 0; i < 10; i++) {
-          const s = document.createElement("span");
-          s.textContent = icons[Math.floor(Math.random() * icons.length)];
-          s.style.left = (50 + (Math.random()*100 - 50)) + "%";
-          s.style.animationDelay = Math.random() * 0.3 + "s";
-          pop.appendChild(s);
-        }
-        box.appendChild(pop);
-        setTimeout(()=>pop.remove(),1000);
-      }
-    }
-  }
-});
-observer.observe(box,{childList:true});
-  break;
-
 
     // 🌧️ 员工模式（保持不变）
     case "staff":
@@ -1024,6 +1001,10 @@ function removeVipEffect() {
   });
   document.querySelectorAll(".bubble,.money-pop").forEach(e=>e.remove());
   console.log("🧹 已清除当前特效");
+	if (window.superGodObserver) {
+  window.superGodObserver.disconnect();
+  window.superGodObserver = null;
+}
 }
 
 </script>
