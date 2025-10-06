@@ -958,7 +958,17 @@ case "supergod":
       }
     }
   });
-  observer.observe(box,{childList:true});
+let lastTrigger = 0;
+observer.observe(box,{childList:true});
+for(const m of muts){
+  if(m.type==='childList' && m.addedNodes.length){
+    const now = Date.now();
+    if(now - lastTrigger < 500) return; // 防止瞬间重复
+    lastTrigger = now;
+    const last=[...box.querySelectorAll('.message')].pop();
+    if(last && last.classList.contains('me')) beachMoneyFX();
+  }
+}
 
   break;
 
@@ -1044,6 +1054,15 @@ function removeVipEffect() {
   50%  { transform: translate(2px,-2px) rotate(1deg); }
   75%  { transform: translate(-1px,1px) rotate(0deg); }
   100% { transform: translate(0,0) rotate(0deg); }
+}
+</style>
+<style>
+#vipEffect, #superEffect {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
 }
 </style>
 
