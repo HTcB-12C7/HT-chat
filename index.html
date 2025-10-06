@@ -397,7 +397,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
   }
 </script>
-——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+			
 <!-- Firebase 登录逻辑 -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -785,8 +785,8 @@ document.getElementById("saveBtn").onclick = async () => {
 };
 </script>
 <script type="module">
-+ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-+ import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 // 🔹 从 Firebase 自动加载 vipLevel
 window.userVipLevel = "none";
 window.activeEffect = null;
