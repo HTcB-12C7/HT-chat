@@ -818,6 +818,7 @@ onAuthStateChanged(authCheck, async (user) => {
 window.activeEffect = null;	
 
 // 注册所有按钮点击事件
+window.addEventListener("load", () => {
 document.querySelectorAll(".vip-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const level = btn.dataset.level;
@@ -1051,7 +1052,7 @@ function removeVipEffect() {
   window.superGodObserver = null;
 }
 }
-
+}); // ← 对应 window.addEventListener("load")
 </script>
 <style>
 @keyframes gradientMove {
