@@ -763,40 +763,38 @@ document.getElementById("saveBtn").onclick = async () => {
 <script>
 // 🔹 模拟从数据库读取的 VIP 等级
 // 实际开发中，这个值从 Firebase 获取，例如 data.vipLevel
-let userVipLevel = "none"; 
-// 示例值可改为： "vip" / "super" / "supergod" / "staff"
+let userVipLevel = "vip"; // ← 测试可先改为 vip/super/supergod/staff
 
 // 🔹 当前是否启用了特效
 let activeEffect = null;
 
+// 注册所有按钮点击事件
 document.querySelectorAll(".vip-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const level = btn.dataset.level;
 
-    // 非VIP点击提示
+    // 非VIP提示
     if (userVipLevel === "none") {
-      alert("❗需要购买黑铁商品或赞助此网站成为黑铁VIP。\n请联系管理或CEO获取购买链接。");
+      alert("❗需要购买黑铁商品或赞助此网站成为黑铁VIP。");
       return;
     }
 
-    // 权限不够的VIP点击提示
+    // 权限不足提示
     const levels = ["vip", "super", "supergod", "staff"];
     const userIndex = levels.indexOf(userVipLevel);
     const btnIndex = levels.indexOf(level);
-
     if (userIndex < btnIndex) {
-      alert("⚠️ 您当前的VIP权限不足，请购买更多商品以升级黑铁VIP。");
+      alert("⚠️ 您当前的VIP权限不足，请升级。");
       return;
     }
 
-    // 已有权限 -> 切换特效
+    // 切换状态
     if (activeEffect === level) {
-      // 取消特效
       removeVipEffect();
       activeEffect = null;
       alert("🌀 已关闭特效。");
     } else {
-      // 启动特效
+      removeVipEffect();
       applyVipEffect(level);
       activeEffect = level;
       alert("✨ 特效已开启！");
@@ -804,166 +802,174 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
   });
 });
 
-
-// 🔹 预留特效函数（你在这里填入具体特效代码）
+// 🔹 特效函数
 function applyVipEffect(level) {
-  switch(level) {
-case "vip":
-  console.log("🍫 启用黑铁VIP炫彩特效");
-  const vipStyle = document.createElement("style");
-  vipStyle.textContent = `
-    @keyframes vipGradient {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-    }
-    .vipEffect {
-      font-size: 48px;
-      font-weight: bold;
-      padding: 20px 30px;
-      display: inline-block;
-      border: 4px solid transparent;
-      border-image: linear-gradient(45deg, saddlebrown, black, orange) 1;
-      border-radius: 12px;
-      background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown);
-      background-size: 600% 600%;
-      color: transparent;
-      -webkit-background-clip: text;
-      background-clip: text;
-      text-shadow: 0 0 10px rgba(139,69,19,0.6), 0 0 20px rgba(255,140,0,0.6);
-      animation: vipGradient 4s linear infinite;
-    }`;
-  document.head.appendChild(vipStyle);
-  const el = document.createElement("div");
-  el.className = "vipEffect";
-  el.textContent = "🍫 黑铁VIP炫彩模式";
-  document.body.appendChild(el);
-  break;
+  removeVipEffect(); // 先清除旧的
 
-case "super":
-  console.log("🔥 启用超级VIP服主威压特效");
-  const superStyle = document.createElement("style");
-  superStyle.textContent = `
-    .pressure {
-      font-size: 70px;
-      font-weight: bold;
-      color: #ff3c00;
-      text-shadow: 0 0 10px #ff3c00, 0 0 20px #ff6a00, 0 0 40px #ff0000, 0 0 80px #ff0000;
-      animation: pressPulse 1.2s infinite alternate ease-in-out, shake 0.1s infinite linear;
-    }
-    @keyframes pressPulse {
-      0% { transform: scale(1); color: #ff3c00; }
-      50% { transform: scale(1.2); color: #ff0000; }
-      100% { transform: scale(1.1); color: #ffa500; }
-    }
-    @keyframes shake {
-      0% { transform: translate(0,0); }
-      25% { transform: translate(-2px,2px); }
-      50% { transform: translate(2px,-2px); }
-      75% { transform: translate(-1px,1px); }
-      100% { transform: translate(0,0); }
-    }`;
-  document.head.appendChild(superStyle);
-  const press = document.createElement("div");
-  press.className = "pressure";
-  press.textContent = "服主威压";
-  document.body.appendChild(press);
-  break;
+  switch (level) {
+    case "vip":
+      console.log("🍫 启用黑铁VIP炫彩特效");
+      const vipStyle = document.createElement("style");
+      vipStyle.id = "vipStyle";
+      vipStyle.textContent = `
+        @keyframes vipGradient {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
+        }
+        .vipEffect {
+          font-size: 48px;
+          font-weight: bold;
+          padding: 20px 30px;
+          display: inline-block;
+          border: 4px solid transparent;
+          border-image: linear-gradient(45deg, saddlebrown, black, orange) 1;
+          border-radius: 12px;
+          background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown);
+          background-size: 600% 600%;
+          color: transparent;
+          -webkit-background-clip: text;
+          background-clip: text;
+          text-shadow: 0 0 10px rgba(139,69,19,0.6), 0 0 20px rgba(255,140,0,0.6);
+          animation: vipGradient 4s linear infinite;
+        }`;
+      document.head.appendChild(vipStyle);
+      const el = document.createElement("div");
+      el.className = "vipEffect";
+      el.id = "vipEffect";
+      el.textContent = "🍫 黑铁VIP炫彩模式";
+      document.body.appendChild(el);
+      break;
 
-case "supergod":
-  console.log("🏖️ 启用超级无敌VIP夏日海滩特效");
-  const beachCSS = document.createElement("style");
-  beachCSS.textContent = `
-    #chat-box {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(to bottom,#8fd3ff 0%,#bfe7ff 25%,#2aa6ff 45%,#0b5fc3 65%,#f5d49d 100%);
-      box-shadow: 0 0 40px rgba(255,215,106,.4) inset;
-      border: 3px solid rgba(255,215,106,.6);
-      border-radius: 14px;
-      animation: glow 3s linear infinite;
-    }
-    @keyframes glow {
-      0%,100%{box-shadow:0 0 25px rgba(255,215,106,.3) inset;}
-      50%{box-shadow:0 0 60px rgba(255,215,106,.6) inset;}
-    }`;
-  document.head.appendChild(beachCSS);
-  break;
+    case "super":
+      console.log("🔥 启用超级VIP服主威压特效");
+      const superStyle = document.createElement("style");
+      superStyle.id = "superStyle";
+      superStyle.textContent = `
+        .pressure {
+          font-size: 70px;
+          font-weight: bold;
+          color: #ff3c00;
+          text-shadow: 0 0 10px #ff3c00, 0 0 20px #ff6a00,
+                       0 0 40px #ff0000, 0 0 80px #ff0000;
+          animation: pressPulse 1.2s infinite alternate ease-in-out,
+                     shake 0.1s infinite linear;
+        }
+        @keyframes pressPulse {
+          0% { transform: scale(1); color: #ff3c00; }
+          50% { transform: scale(1.2); color: #ff0000; }
+          100% { transform: scale(1.1); color: #ffa500; }
+        }
+        @keyframes shake {
+          0% { transform: translate(0,0); }
+          25% { transform: translate(-2px,2px); }
+          50% { transform: translate(2px,-2px); }
+          75% { transform: translate(-1px,1px); }
+          100% { transform: translate(0,0); }
+        }`;
+      document.head.appendChild(superStyle);
+      const press = document.createElement("div");
+      press.className = "pressure";
+      press.id = "superEffect";
+      press.textContent = "服主威压";
+      document.body.appendChild(press);
+      break;
 
+    case "supergod":
+      console.log("🏖️ 启用超级无敌VIP夏日海滩特效");
+      const beachCSS = document.createElement("style");
+      beachCSS.id = "beachCSS";
+      beachCSS.textContent = `
+        #chat-box {
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(to bottom,#8fd3ff 0%,#bfe7ff 25%,
+                                      #2aa6ff 45%,#0b5fc3 65%,#f5d49d 100%);
+          box-shadow: 0 0 40px rgba(255,215,106,.4) inset;
+          border: 3px solid rgba(255,215,106,.6);
+          border-radius: 14px;
+          animation: glow 3s linear infinite;
+        }
+        @keyframes glow {
+          0%,100%{box-shadow:0 0 25px rgba(255,215,106,.3) inset;}
+          50%{box-shadow:0 0 60px rgba(255,215,106,.6) inset;}
+        }`;
+      document.head.appendChild(beachCSS);
+      break;
 
-case "staff":
-  console.log("🌧️ 启用黑铁员工权限");
-
-  if (document.getElementById("rainCanvas")) {
-    alert("☔ 已经在下雨啦~");
-    return;
-  }
-
-  const rainCanvas = document.createElement("canvas");
-  rainCanvas.id = "rainCanvas";
-  rainCanvas.style.cssText = `
-    position:fixed; inset:0;
-    width:100%; height:100%;
-    z-index:9999;
-    pointer-events:none;
-    background: radial-gradient(120% 80% at 50% -10%, #1d274b 0%, #0b1020 55%, #060912 100%);
-  `;
-  document.body.appendChild(rainCanvas);
-
-  const ctx = rainCanvas.getContext("2d");
-  let W, H, drops = [], wind = 0.6, rainCount = 900;
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-
-  function resize() {
-    W = rainCanvas.width = innerWidth * DPR;
-    H = rainCanvas.height = innerHeight * DPR;
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  function makeDrop() {
-    const z = Math.random() * 0.9 + 0.1;
-    return {
-      x: Math.random() * W,
-      y: Math.random() * -H,
-      vx: wind * 200 * z,
-      vy: (900 + Math.random() * 600) * z,
-      len: 20 * z,
-      a: 0.3 + 0.5 * z
-    };
-  }
-
-  for (let i = 0; i < rainCount; i++) drops.push(makeDrop());
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(180,200,255,0.7)";
-    ctx.lineWidth = 1;
-    for (let d of drops) {
-      ctx.beginPath();
-      ctx.moveTo(d.x, d.y);
-      ctx.lineTo(d.x - d.vx * 0.02, d.y - d.vy * 0.02 - d.len);
-      ctx.stroke();
-      d.x += d.vx * 0.016;
-      d.y += d.vy * 0.016;
-      if (d.y > H) {
-        d.y = -20;
-        d.x = Math.random() * W;
+    case "staff":
+      console.log("🌧️ 启用黑铁员工权限");
+      if (document.getElementById("rainCanvas")) {
+        alert("☔ 已经在下雨啦~");
+        return;
       }
-    }
-    requestAnimationFrame(draw);
+      const rainCanvas = document.createElement("canvas");
+      rainCanvas.id = "rainCanvas";
+      rainCanvas.style.cssText = `
+        position:fixed; inset:0;
+        width:100%; height:100%;
+        z-index:9999;
+        pointer-events:none;
+        background: radial-gradient(120% 80% at 50% -10%, #1d274b 0%, #0b1020 55%, #060912 100%);
+      `;
+      document.body.appendChild(rainCanvas);
+      const ctx = rainCanvas.getContext("2d");
+      let W, H, drops = [], wind = 0.6, rainCount = 900;
+      const DPR = Math.min(window.devicePixelRatio || 1, 2);
+      function resize() {
+        W = rainCanvas.width = innerWidth * DPR;
+        H = rainCanvas.height = innerHeight * DPR;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+      function makeDrop() {
+        const z = Math.random() * 0.9 + 0.1;
+        return {
+          x: Math.random() * W,
+          y: Math.random() * -H,
+          vx: wind * 200 * z,
+          vy: (900 + Math.random() * 600) * z,
+          len: 20 * z,
+          a: 0.3 + 0.5 * z
+        };
+      }
+      for (let i = 0; i < rainCount; i++) drops.push(makeDrop());
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        ctx.strokeStyle = "rgba(180,200,255,0.7)";
+        for (let d of drops) {
+          ctx.beginPath();
+          ctx.moveTo(d.x, d.y);
+          ctx.lineTo(d.x - d.vx * 0.02, d.y - d.vy * 0.02 - d.len);
+          ctx.stroke();
+          d.x += d.vx * 0.016;
+          d.y += d.vy * 0.016;
+          if (d.y > H) {
+            d.y = -20;
+            d.x = Math.random() * W;
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+      rainCanvas.addEventListener("click", () => {
+        rainCanvas.remove();
+        alert("🌤️ 雨停啦！");
+      });
+      break;
   }
-  draw();
+}
 
-  rainCanvas.addEventListener("click", () => {
-    rainCanvas.remove();
-    alert("🌤️ 雨停啦！");
-  });
-  break;
-
-// 🔹 移除所有特效（点击关闭时执行）
+// 🔹 移除所有特效
 function removeVipEffect() {
+  ["vipStyle", "superStyle", "beachCSS"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  ["vipEffect", "superEffect", "rainCanvas"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
   console.log("🧹 已清除当前特效");
-  // 👉 这里写恢复默认聊天背景、移除动画等
 }
 </script>
 
