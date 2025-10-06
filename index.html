@@ -20,35 +20,45 @@
 /* 聊天框样式 */
 /* 聊天框整体背景 */
 /* 最外层 main-container 改成纵向布局，让中间可撑满 */
+/* ✅ 保留侧边栏 + 右侧内容水平排列 */
 .main-container {
-  display: block !important;
+  display: flex;
+  align-items: flex-start; /* 顶部对齐 */
+  justify-content: flex-start;
+  width: 100%;
 }
 
-/* 聊天区域真正的背景框：强制占满视口宽度 */
+/* ✅ 右侧聊天区整体容器 */
 .container {
-  width: 50vw !important;   /* 占视口宽度的95%，而不是px */
-  max-width: none !important;
-  margin: 20px auto !important;
-  padding: 30px !important;
+  flex: 1;                  /* 撑满剩余空间 */
+  width: auto !important;   /* 自动宽度，不要固定px */
+  max-width: 90vw;          /* 最多占屏幕宽度的90% */
+  margin: 40px auto;        /* 居中并向下留白 */
   background: #111 !important;
-  border-radius: 17px !important;
-  box-shadow: 0 0 27px rgba(0,0,0,0.6) !important;
+  padding: 40px;
+  border-radius: 17px;
+  box-shadow: 0 0 27px rgba(0,0,0,0.6);
+  box-sizing: border-box;
 }
 
-/* 聊天内容里的chat-box占满剩余空间 */
+/* ✅ 聊天主区域：左右布局不变 */
 #chat-container {
   display: flex;
-  width: 100% !important;
+  width: 100%;
+  gap: 10px;
 }
 
+/* ✅ 聊天框 */
 #chat-box {
   flex: 1;
   height: 60vh;
   background: saddlebrown;
-  border-radius: 10px;
   border: 2px solid #333;
-  overflow-y: auto;
+  border-radius: 10px;
   padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 消息基础样式 */
