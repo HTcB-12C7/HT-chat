@@ -257,8 +257,26 @@ document.addEventListener('touchstart', enableBgm, { once: true });
       display:flex;
       flex-direction:column;
   "></div>
-</div>
 
+  <!-- ✅ 把 VIP 特权放进来 -->
+  <div id="vip-panel" style="
+      width:22%;
+      background:#1a1a1a;
+      color:#ffcc66;
+      border-radius:10px;
+      padding:15px;
+      font-size:15px;
+      height:60vh;
+      overflow-y:auto;">
+    <h3 style="color:gold; text-align:center;">⚡ 黑铁VIP特权</h3>
+    <ul>
+      <li>🍫 黑铁VIP：炫彩发光昵称</li>
+      <li>🔥❗ 超级VIP：服主威压特效</li>
+      <li> 🏖️🌊💫无敌VIP：海滩金光特效 + 金币爆炸</li>
+      <li>🌧️ 黑铁员工：可施加“下雨封禁”</li>
+    </ul>
+  </div>
+</div>					
 <div style="display: flex; width: 100%; gap: 5px;">
   <input type="text" id="msg" placeholder="输入消息..." 
     style="flex: 8; padding: 10px; border: 1px solid #aaa; border-radius:5px;
@@ -270,18 +288,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     启动/回车
   </button>
 </div>
-						
-<!-- ✅ 新增右侧黑铁VIP特权面板 -->
-  <div id="vip-panel" style="width:22%; background:#1a1a1a; color:#ffcc66; border-radius:10px; padding:15px; font-size:15px; height:60vh; overflow-y:auto;">
-    <h3 style="color:gold; text-align:center;">⚡ 黑铁VIP特权</h3>
-    <ul>
-      <li>🍫 黑铁VIP：炫彩发光昵称</li>
-      <li>🔥 超级VIP：服主威压特效</li>
-      <li>🌊 无敌VIP：海滩金光特效 + 金币爆炸</li>
-      <li>🌧️ 黑铁员工：可施加“下雨封禁”</li>
-    </ul>
-  </div>
-						
+								
 <!-- ✅ 使用须知 -->
 <div id="chat-rules" style="
   margin-top: 10px;
