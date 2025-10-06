@@ -673,29 +673,52 @@ function sanitize(str) {
 }
 
 // --- 发送消息 ---
+// ✅ 全面修复版：超级无敌VIP 开启后仍可发消息
 window.sendMsg = async function () {
-  if (!usernameReady) return alert("昵称还未加载完成，请稍候~");
-const text = sanitize(msgInput.value.trim());
-  if (!text) return;
+  try {
+    if (!usernameReady || !username) {
+      alert("昵称还未加载完成，请稍候~");
+      return;
+    }
 
-  let avatarURL = "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
-  if (auth.currentUser) {
-    const uRef = ref(db, "users/" + auth.currentUser.uid);
-    const snap = await get(uRef);
-    if (snap.exists() && snap.val().avatar) avatarURL = snap.val().avatar;
-    else if (auth.currentUser.photoURL) avatarURL = auth.currentUser.photoURL;
+    const text = sanitize(msgInput.value.trim());
+    if (!text) return;
+
+    // 重新确认 UID
+    if (!currentUserId) {
+      currentUserId = auth.currentUser ? auth.currentUser.uid : "guest_" + Math.random().toString(36).substring(2, 10);
+    }
+
+    // 获取头像
+    let avatarURL = "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
+    if (auth.currentUser) {
+      const uRef = ref(db, "users/" + auth.currentUser.uid);
+      const snap = await get(uRef);
+      if (snap.exists() && snap.val().avatar) avatarURL = snap.val().avatar;
+      else if (auth.currentUser.photoURL) avatarURL = auth.currentUser.photoURL;
+    }
+
+    // 确保 VIP 状态稳定（避免 null）
+    const vipLevelToSend = activeEffect && activeEffect !== "none"
+      ? activeEffect
+      : userVipLevel || "none";
+
+    // ✅ 核心发送逻辑
+    await push(messagesRef, {
+      uid: currentUserId,
+      user: username,
+      text,
+      time: Date.now(),
+      avatar: avatarURL,
+      vipLevel: vipLevelToSend
+    });
+
+    // 清空输入框
+    msgInput.value = "";
+  } catch (err) {
+    console.error("❌ 发送消息失败：", err);
+    alert("发送失败，请稍后再试：" + err.message);
   }
-
-await push(messagesRef, {
-  uid: currentUserId,
-  user: username,
-  text,
-  time: Date.now(),
-  avatar: avatarURL,
-  vipLevel: activeEffect || userVipLevel || "none" // ✅ 写入当前特效等级
-});
-
-  msgInput.value = "";
 };
 
 // ✅ 回车发送
@@ -890,16 +913,24 @@ case "supergod":
   const css = document.createElement("style");
   css.id = "beachCSS";
   css.textContent = `
+    /* ✅ 只对聊天框设置海滩背景，不隐藏外部 */
     #chat-box {
       position: relative;
-      overflow: hidden;
-      background: linear-gradient(to bottom,#8fd3ff 0%,#bfe7ff 25%,#2aa6ff 45%,#0b5fc3 65%,#f5d49d 100%);
+      background: linear-gradient(to bottom,
+        #8fd3ff 0%, #bfe7ff 25%, #2aa6ff 45%, #0b5fc3 65%, #f5d49d 100%);
+      border: 3px solid transparent;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
       animation: glowBorder 3s ease-in-out infinite alternate;
     }
+
+    /* ✅ 特效动画 */
     @keyframes glowBorder {
       0% { box-shadow: inset 0 0 20px rgba(255,215,106,.25); }
       100% { box-shadow: inset 0 0 40px rgba(255,215,106,.5); }
     }
+
+    /* ✅ 泡泡 */
     .bubble {
       position: absolute;
       bottom: 25%;
@@ -908,24 +939,40 @@ case "supergod":
       background: rgba(255,255,255,.8);
       box-shadow: inset 0 0 4px #fff;
       animation: rise 5s ease-in infinite;
+      z-index: 0;
     }
     @keyframes rise {
       0% { transform: translateY(0); opacity: 1; }
       100% { transform: translateY(-160px); opacity: 0; }
     }
+
+    /* ✅ 金币动画 */
     .money-pop span {
       position: absolute;
-      font-size: 20px;
+      font-size: 22px;
       animation: coinUp 1s ease-out forwards;
+      text-shadow: 0 2px 4px rgba(0,0,0,.25);
+      z-index: 2;
     }
     @keyframes coinUp {
       0% { transform: translateY(0); opacity: 1; }
       100% { transform: translateY(-140px); opacity: 0; }
     }
+
+    /* ✅ 输入框同步金色主题 */
+    #msg {
+      background: #ffef9c;
+      color: #5b3900;
+      border: 2px solid #f3b233;
+      box-shadow: 0 0 8px rgba(255,215,106,0.5);
+    }
+    #msg::placeholder {
+      color: #8b5e00;
+    }
   `;
   document.head.appendChild(css);
 
-  // 🌊 只生成一次泡泡层
+  // 🌊 泡泡层
   if (!box.querySelector(".bubble")) {
     for (let i = 0; i < 10; i++) {
       const b = document.createElement("div");
@@ -963,7 +1010,7 @@ case "supergod":
   });
   window.superGodObserver.observe(box, { childList: true });
   break;
-
+		  
     // 🌧️ 员工模式（保持不变）
     case "staff":
       const rainCanvas = document.createElement("canvas");
