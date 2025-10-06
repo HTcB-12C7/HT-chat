@@ -270,6 +270,18 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     启动/回车
   </button>
 </div>
+						
+<!-- ✅ 新增右侧黑铁VIP特权面板 -->
+  <div id="vip-panel" style="width:22%; background:#1a1a1a; color:#ffcc66; border-radius:10px; padding:15px; font-size:15px; height:60vh; overflow-y:auto;">
+    <h3 style="color:gold; text-align:center;">⚡ 黑铁VIP特权</h3>
+    <ul>
+      <li>🍫 黑铁VIP：炫彩发光昵称</li>
+      <li>🔥 超级VIP：服主威压特效</li>
+      <li>🌊 无敌VIP：海滩金光特效 + 金币爆炸</li>
+      <li>🌧️ 黑铁员工：可施加“下雨封禁”</li>
+    </ul>
+  </div>
+						
 <!-- ✅ 使用须知 -->
 <div id="chat-rules" style="
   margin-top: 10px;
@@ -530,15 +542,48 @@ onChildAdded(messagesRef, (snapshot) => {
   const msgClass = isMe ? "me" : "other";
   const avatar = msgData.avatar || "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
 
-  chatBox.innerHTML += `
-    <div class="message ${msgClass}" style="display:flex;align-items:flex-start;gap:8px;">
-      ${isMe ? "" : `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">`}
-      <div style="max-width:80%;">
-        <div class="msg-time">${time}</div>
-        <div><b>${msgData.user}:</b> ${msgData.text}</div>
-      </div>
-      ${isMe ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">` : ""}
-    </div>`;
+const level = msgData.vipLevel || "none";
+let levelTag = "";
+
+if (level === "vip") {
+  levelTag = `<span style="
+    background: linear-gradient(45deg,saddlebrown,black,orange);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight:bold;
+    text-shadow: 0 0 8px rgba(255,140,0,0.6);
+  ">黑铁VIP</span>`;
+} 
+else if (level === "super") {
+  levelTag = `<span style="
+    font-weight:bold;color:#ff3c00;
+    text-shadow:0 0 10px #ff3c00,0 0 20px #ff6a00,0 0 40px #ff0000,0 0 80px #ff0000;
+  ">黑铁超级VIP</span>`;
+}
+else if (level === "supergod") {
+  levelTag = `<span style="
+    background: linear-gradient(90deg,#ffef9c,#ffd76a,#f3b233);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight:bold;
+    animation: glow 2s linear infinite;
+  ">黑铁超级无敌VIP</span>`;
+}
+else if (level === "staff") {
+  levelTag = `<span style="color:deepskyblue;font-weight:bold;">黑铁员工</span>`;
+}
+
+	
+chatBox.innerHTML += `
+  <div class="message ${msgClass}" style="display:flex;align-items:flex-start;gap:8px;">
+    ${isMe ? "" : `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">`}
+    <div style="max-width:80%;">
+      <div class="msg-time">${time}</div>
+      <div><b>${levelTag} ${msgData.user}:</b> ${msgData.text}</div>
+    </div>
+    ${isMe ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">` : ""}
+  </div>`;
+
   chatBox.scrollTop = chatBox.scrollHeight;
 });
 // ✅ 监听在线用户变化
@@ -580,11 +625,21 @@ if (uid === currentUserId) {
     onlineList.innerHTML = "<li style='color:#aaa;'>暂无用户在线</li>";
   }
 });
+// ✅ 过滤HTML危险字符，防止用户输入<script>或HTML标签
+function sanitize(str) {
+  return str.replace(/[&<>"']/g, s => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[s]));
+}
 
 // --- 发送消息 ---
 window.sendMsg = async function () {
   if (!usernameReady) return alert("昵称还未加载完成，请稍候~");
-  const text = msgInput.value.trim();
+const text = sanitize(msgInput.value.trim());
   if (!text) return;
 
   let avatarURL = "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
