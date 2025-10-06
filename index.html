@@ -833,7 +833,70 @@ function applyVipEffect(level) {
       /* ===== 黑铁员工特效区 ===== */
       console.log("🌧️ 启用黑铁员工权限");
       // 👉 在此插入下雨封禁动画代码
-	<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>全屏下雨·求雨特效</title><style>html,body{height:100%;margin:0;background:#0b1020;overflow:hidden}.bg{position:fixed;inset:0;background:radial-gradient(120% 80% at 50% -10%,#1d274b 0%,#0b1020 55%,#060912 100%);filter:contrast(1.1) brightness(.95);z-index:0}.flash{position:fixed;inset:0;background:#e9f2ff;opacity:0;pointer-events:none;z-index:3;transition:opacity .12s ease}.ui{position:fixed;left:12px;bottom:12px;z-index:4;background:rgba(10,14,26,.6);color:#dfe7ff;font:14px/1.2 system-ui,Segoe UI,Roboto,Helvetica,Arial;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;backdrop-filter:blur(6px)}.ui label{display:flex;gap:8px;align-items:center;margin:6px 0}.ui input[type=range]{width:180px}.ui button{border:none;border-radius:10px;padding:6px 10px;cursor:pointer;background:#2b3560;color:#fff}.ui .mini{opacity:.7;font-size:12px;margin-top:4px}</style></head><body><div class="bg"></div><canvas id="rain"></canvas><div class="flash" id="flash"></div><div class="ui"><label>雨量<input id="intensity" type="range" min="200" max="2000" step="50" value="900"><span id="intVal">900</span></label><label>风向<input id="wind" type="range" min="-2.5" max="2.5" step="0.1" value="0.8"><span id="windVal">0.8</span></label><label>速度<input id="speed" type="range" min="0.6" max="2.0" step="0.1" value="1.2"><span id="spdVal">1.2x</span></label><div style="display:flex;gap:8px;margin-top:6px"><button id="toggleFlash">⚡ 闪电</button><button id="toggleSplash">💧 溅射</button><button id="toggleUI">🫥 隐藏UI</button></div><div class="mini">提示：拖动雨量↑即可“求雨”更大；手机也可运行。</div></div><script>(()=>{const e=document.getElementById("rain"),t=e.getContext("2d"),n=document.getElementById("flash"),i=e=>document.getElementById(e),a=i("intensity"),o=i("wind"),r=i("speed"),l=i("intVal"),c=i("windVal"),d=i("spdVal"),s=i("toggleFlash"),h=i("toggleSplash"),f=i("toggleUI"),u=document.querySelector(".ui");let p=0,m=0,g=Math.min(window.devicePixelRatio||1,2),v=[],y=[],b=performance.now(),w=+a.value,x=+o.value,k=+r.value,S=!0,q=!0;function E(){p=e.width=Math.floor(innerWidth*g),m=e.height=Math.floor(innerHeight*g),e.style.width=innerWidth+"px",e.style.height=innerHeight+"px"}function M(){const e=Math.random()*.9+.1,t=(18+22*Math.random())*e,n=(900+600*Math.random())*e,i=200*x*e,a=Math.random()*p,o=-Math.random()*.2*m,r=.25+.5*e;return{x:a,y:o,vx:i,vy:n,len:t,a:r,z:e}}function L(e,t,n){if(!q)return;const i=2+(3*Math.random()|0);for(let a=0;a<i;a++){const i=-Math.PI/2+Math.random()*Math.PI,o=(80+120*Math.random())*n;y.push({x:e,y:t,vx:Math.cos(i)*o,vy:Math.sin(i)*o,life:220+180*Math.random(),z:n})}}function P(){const e=w-v.length;if(e>0)for(let t=0;t<Math.min(e,60);t++)v.push(M());else e<0&&v.splice(0,Math.min(-e,60))}function z(e){const n=Math.min(e-b,40)/1e3;b=e,P(),t.clearRect(0,0,p,m),t.globalCompositeOperation="lighter";for(let e=0;e<v.length;e++){const i=v[e];i.x+=i.vx*k*n*g,i.y+=i.vy*k*n*g,t.beginPath(),t.strokeStyle=`rgba(180,200,255,${i.a})`,t.lineWidth=Math.max(1,1.2*i.z*g),t.moveTo(i.x,i.y),t.lineTo(i.x-.02*i.vx,i.y-.02*i.vy-i.len*g),t.stroke(),i.y>m-2*g?(L(i.x,m-2*g,i.z),v[e]=M(),v[e].x=Math.random()*p):i.x<-50||i.x>p+50||i.y<-100&&(v[e]=M())}t.globalCompositeOperation="source-over";for(let e=y.length-1;e>=0;e--){const n=y[e];n.vy+=600*n*g;const i=Math.min(n.vy*0+n.vx*0,600*n*g);n.x+=n.vx*n*g,n.y+=n.vy*n*g,n.life-=1e3*n;const a=Math.max(0,n.life/400);t.fillStyle=`rgba(200,220,255,${a})`,t.beginPath(),t.arc(n.x,n.y,Math.max(.5,1.6*n.z*g),0,2*Math.PI),t.fill(),(n.y>m||n.life<=0)&&y.splice(e,1)}S&&Math.random()<.0025*(w/800)&&C(),requestAnimationFrame(z)}requestAnimationFrame(z);let T=0;function C(){const e=1+(2*Math.random()|0),t=[];for(let n=0;n<e;n++)t.push(60+120*Math.random()),n<e-1&&t.push(40+100*Math.random());let i=0;const a=()=>{if(i>=t.length)return void(n.style.opacity=0);const e=i%2==0?.18+.35*Math.random():0;n.style.opacity=e,clearTimeout(T),T=setTimeout(()=>{i++,a()},t[i])};a()}a.addEventListener("input",e=>{w=+e.target.value,l.textContent=w}),o.addEventListener("input",e=>{x=+e.target.value,c.textContent=x.toFixed(1)}),r.addEventListener("input",e=>{k=+e.target.value,d.textContent=k.toFixed(1)+"x"}),s.addEventListener("click",()=>{S=!S,s.textContent=S?"⚡ 闪电":"⚡ 关"}),h.addEventListener("click",()=>{q=!q,h.textContent=q?"💧 溅射":"💧 关"}),f.addEventListener("click",()=>{u.style.display="none"===u.style.display?"block":"none"});let B=!1;addEventListener("pointerdown",()=>{B=!B,w=B?Math.min(2e3,1.6*w|0):Math.max(200,.6*w|0),a.value=w,l.textContent=w},{passive:!0})})();</script></body></html>
+      // ✅ 点击员工权限按钮时才触发求雨
+      function startRainEffect() {
+        if (document.getElementById("rainCanvas")) return; // 防重复添加
+
+        const rainCanvas = document.createElement("canvas");
+        rainCanvas.id = "rainCanvas";
+        rainCanvas.style.cssText = `
+          position:fixed; inset:0; z-index:9999;
+          background: radial-gradient(120% 80% at 50% -10%, #1d274b 0%, #0b1020 55%, #060912 100%);
+        `;
+        document.body.appendChild(rainCanvas);
+
+        const ctx = rainCanvas.getContext("2d");
+        let W, H, drops = [], wind = 0.5, rainCount = 800;
+        const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+        function resize() {
+          W = rainCanvas.width = innerWidth * DPR;
+          H = rainCanvas.height = innerHeight * DPR;
+          ctx.scale(DPR, DPR);
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        function makeDrop() {
+          const z = Math.random() * 0.9 + 0.1;
+          return {
+            x: Math.random() * W,
+            y: Math.random() * -H,
+            vx: wind * 200 * z,
+            vy: (900 + Math.random() * 600) * z,
+            len: 20 * z,
+            a: 0.3 + 0.5 * z,
+          };
+        }
+        for (let i = 0; i < rainCount; i++) drops.push(makeDrop());
+
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          ctx.strokeStyle = "rgba(180,200,255,0.7)";
+          ctx.lineWidth = 1;
+          for (let d of drops) {
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y);
+            ctx.lineTo(d.x - d.vx * 0.02, d.y - d.vy * 0.02 - d.len);
+            ctx.stroke();
+            d.x += d.vx * 0.016;
+            d.y += d.vy * 0.016;
+            if (d.y > H) {
+              d.y = -20;
+              d.x = Math.random() * W;
+            }
+          }
+          requestAnimationFrame(draw);
+        }
+        draw();
+
+        // ⛈️ 再点击一次关闭雨
+        rainCanvas.addEventListener("click", () => {
+          rainCanvas.remove();
+        });
+      }
+
+      startRainEffect();
       break;
   }
 }
