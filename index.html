@@ -119,7 +119,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
                     <img class="logo" src="
 						assets/HTgovIconV2.png" alt="返回主页">
                 </a>
-                HT-chat <span>全GOOGLE开放</span>
+                HT-chat <span> 全GOOGLE开放</span>
                 
                 <!-- Language 按钮 -->
                 <button id="lang-toggle" style="
@@ -227,7 +227,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 ">	
                     <div class="container">
 
-<h2>HT 逝世聊天</h2>
+<h2>HT 逝世聊天 ———— FIREBASE后端 US中部服务器 支持</h2>
 
 <div id="chat-container" style="display:flex; width:100%; margin:auto; gap:10px;">
   <!-- ✅ 左侧在线用户列表 -->
@@ -488,7 +488,7 @@ async function registerOnlineUser(user, nickname, isGuest = false) {
   await set(guestRef, {
     nickname: username,
     email: "(游客)",
-    realname: "",
+    realname: "🟡",
     lastActive: Date.now()
   });
   window.addEventListener("beforeunload", () => remove(guestRef));
@@ -513,7 +513,7 @@ if (user) {
   await set(guestRef, {
     nickname: username,
     email: "(游客)",
-    realname: "",
+    realname: "🟡",
     lastActive: Date.now()
   });
   window.addEventListener("beforeunload", () => remove(guestRef));
@@ -561,10 +561,10 @@ onValue(onlineUsersRef, (snapshot) => {
       }
 
       const nickname = u.nickname || "(匿名)";
-      const email = u.email || "";
-      const realname = u.realname || "";
-// ✅ 当前用户显示🟢，其他用户（包括游客）🟡
-let dot = "🟡";
+      const email = u.email || "🟡";
+      const realname = u.realname || "🟡";
+// ✅ 当前用户显示🟢，其他用户（包括游客）🟢
+let dot = "🟢";
 if (uid === currentUserId) {
   dot = "🟢";
 }
