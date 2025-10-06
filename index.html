@@ -699,9 +699,9 @@ window.sendMsg = async function () {
     }
 
     // 确保 VIP 状态稳定（避免 null）
-    const vipLevelToSend = activeEffect && activeEffect !== "none"
-      ? activeEffect
-      : userVipLevel || "none";
+const vipLevelToSend = window.activeEffect && window.activeEffect !== "none"
+  ? window.activeEffect
+  : window.userVipLevel || "none";
 
     // ✅ 核心发送逻辑
     await push(messagesRef, {
@@ -786,10 +786,8 @@ document.getElementById("saveBtn").onclick = async () => {
 </script>
 <script type="module">
 // 🔹 从 Firebase 自动加载 vipLevel
-let userVipLevel = "none"; // 默认不是VIP
-
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+window.userVipLevel = "none";
+window.activeEffect = null;
 
 const dbCheck = getDatabase();
 const authCheck = getAuth();
@@ -817,7 +815,7 @@ onAuthStateChanged(authCheck, async (user) => {
 });
 
 // 🔹 当前是否启用了特效
-let activeEffect = null;
+window.activeEffect = null;	
 
 // 注册所有按钮点击事件
 document.querySelectorAll(".vip-btn").forEach(btn => {
