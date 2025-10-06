@@ -232,7 +232,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 <div id="chat-container" style="display:flex; width:100%; margin:auto; gap:10px;">
   <!-- ✅ 左侧在线用户列表 -->
   <div id="online-users" style="
-      width:12%;
+      width:18%;
       background:#222;
       color:gold;
       border-radius:8px;
@@ -258,24 +258,53 @@ document.addEventListener('touchstart', enableBgm, { once: true });
       flex-direction:column;
   "></div>
 
-  <!-- ✅ 把 VIP 特权放进来 -->
-  <div id="vip-panel" style="
-      width:12%;
-      background:#1a1a1a;
-      color:#ffcc66;
-      border-radius:10px;
-      padding:15px;
-      font-size:15px;
-      height:60vh;
-      overflow-y:auto;">
-    <h3 style="color:gold; text-align:center;">⚡ 黑铁VIP特权</h3>
-    <ul>
-      <li>🍫 黑铁VIP：炫彩发光昵称</li>
-      <li>🔥❗ 超级VIP：服主威压特效</li>
-      <li> 🏖️🌊💫无敌VIP：海滩金光特效 + 金币爆炸</li>
-      <li>🌧️ 黑铁员工：可施加“下雨封禁”</li>
-    </ul>
-  </div>
+<!-- ✅ 右侧 VIP 特权按钮区 -->
+<div id="vip-panel" style="
+    width:12%;
+    background:#1a1a1a;
+    color:#ffcc66;
+    border-radius:10px;
+    padding:15px;
+    font-size:15px;
+    height:60vh;
+    overflow-y:auto;
+    text-align:center;
+">
+  <h3 style="color:gold;">⚡ 黑铁VIP特权</h3>
+
+  <!-- 黑铁VIP -->
+  <button class="vip-btn" data-level="vip" style="
+      width:100%;margin:8px 0;padding:8px;border:none;border-radius:8px;
+      background:linear-gradient(45deg,saddlebrown,black,orange);
+      color:white;font-weight:bold;cursor:pointer;">
+    🍫 黑铁VIP 特效
+  </button>
+
+  <!-- 超级VIP -->
+  <button class="vip-btn" data-level="super" style="
+      width:100%;margin:8px 0;padding:8px;border:none;border-radius:8px;
+      background:linear-gradient(45deg,red,orange,orangered);
+      color:white;font-weight:bold;cursor:pointer;">
+    🔥 黑铁超级VIP 特效
+  </button>
+
+  <!-- 无敌VIP -->
+  <button class="vip-btn" data-level="supergod" style="
+      width:100%;margin:8px 0;padding:8px;border:none;border-radius:8px;
+      background:linear-gradient(90deg,#ffef9c,#ffd76a,#f3b233);
+      color:black;font-weight:bold;cursor:pointer;">
+    🏖️ 黑铁超级无敌VIP 特效
+  </button>
+
+  <!-- 员工权限 -->
+  <button class="vip-btn" data-level="staff" style="
+      width:100%;margin:8px 0;padding:8px;border:none;border-radius:8px;
+      background:linear-gradient(45deg,#005f8f,#0aa9ff);
+      color:white;font-weight:bold;cursor:pointer;">
+    🌧️ 黑铁员工权限
+  </button>
+</div>
+
 </div>					
 <div style="display: flex; width: 100%; gap: 5px;">
   <input type="text" id="msg" placeholder="输入消息..." 
@@ -730,6 +759,90 @@ document.getElementById("saveBtn").onclick = async () => {
   document.getElementById("userPhoto").src = avatarURL;
   alert("信息已保存！");
 };
+</script>
+<script>
+// 🔹 模拟从数据库读取的 VIP 等级
+// 实际开发中，这个值从 Firebase 获取，例如 data.vipLevel
+let userVipLevel = "none"; 
+// 示例值可改为： "vip" / "super" / "supergod" / "staff"
+
+// 🔹 当前是否启用了特效
+let activeEffect = null;
+
+document.querySelectorAll(".vip-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const level = btn.dataset.level;
+
+    // 非VIP点击提示
+    if (userVipLevel === "none") {
+      alert("❗需要购买黑铁商品或赞助此网站成为黑铁VIP。\n请联系管理或CEO获取购买链接。");
+      return;
+    }
+
+    // 权限不够的VIP点击提示
+    const levels = ["vip", "super", "supergod", "staff"];
+    const userIndex = levels.indexOf(userVipLevel);
+    const btnIndex = levels.indexOf(level);
+
+    if (userIndex < btnIndex) {
+      alert("⚠️ 您当前的VIP权限不足，请购买更多商品以升级黑铁VIP。");
+      return;
+    }
+
+    // 已有权限 -> 切换特效
+    if (activeEffect === level) {
+      // 取消特效
+      removeVipEffect();
+      activeEffect = null;
+      alert("🌀 已关闭特效。");
+    } else {
+      // 启动特效
+      applyVipEffect(level);
+      activeEffect = level;
+      alert("✨ 特效已开启！");
+    }
+  });
+});
+
+
+// 🔹 预留特效函数（你在这里填入具体特效代码）
+function applyVipEffect(level) {
+  switch(level) {
+    case "vip":
+      /* ===== 黑铁VIP特效区 ===== */
+      console.log("🍫 启用黑铁VIP炫彩特效");
+      // 👉 在此填入你的炫彩昵称或文字特效HTML
+		  <!DOCTYPE html> <html lang="zh-CN"> <head> <meta charset="UTF-8"> <title>炫酷动效文字</title> <style> @keyframes gradientMove { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } } </style> </head> <body> <p style=" font-size: 48px; font-weight: bold; padding: 20px 30px; margin: 50px auto; display: inline-block; border: 4px solid transparent; border-image: linear-gradient(45deg, saddlebrown, black, orange) 1; border-radius: 12px; background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown); background-size: 600% 600%; color: transparent; background-clip: text; -webkit-background-clip: text; text-shadow: 0 0 10px rgba(139, 69, 19, 0.6), 0 0 20px rgba(255, 140, 0, 0.6); animation: gradientMove 4s linear infinite; "> 🍫</p> </body> </html>
+      break;
+
+    case "super":
+      /* ===== 黑铁超级VIP特效区 ===== */
+      console.log("🔥 启用超级VIP服主威压特效");
+      // 👉 在此插入服主威压CSS/HTML代码
+		  <!DOCTYPE html> <html lang="zh-CN"> <head>   <meta charset="UTF-8">   <title>服主威压文字特效</title>   <style>        .威压 {       font-size: 70px;       font-weight: bold;       color: #ff3c00;       text-shadow:          0 0 10px #ff3c00,         0 0 20px #ff6a00,         0 0 40px #ff0000,         0 0 80px #ff0000;       animation: 压迫 1.2s infinite alternate ease-in-out,                  震动 0.1s infinite linear;     }      @keyframes 压迫 {       0%   { transform: scale(1);   color: #ff3c00; }       50%  { transform: scale(1.2); color: #ff0000; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff6600, 0 0 80px #ff0000; }       100% { transform: scale(1.1); color: #ffa500; }     }      @keyframes 震动 {       0%   { transform: translate(0,0) rotate(0deg); }       25%  { transform: translate(-2px,2px) rotate(-1deg); }       50%  { transform: translate(2px,-2px) rotate(1deg); }       75%  { transform: translate(-1px,1px) rotate(0deg); }       100% { transform: translate(0,0) rotate(0deg); }     }   </style> </head> <body>   <div class="威压">服主威压</div> 
+      break;
+
+    case "supergod":
+      /* ===== 黑铁超级无敌VIP特效区 ===== */
+      console.log("💫 启用超级无敌VIP夏日海滩特效");
+      // 👉 在此插入海滩金光或金币爆炸动画
+		   <!DOCTYPE html> <html lang="zh-CN"> <style>:root{--sky:#8fd3ff;--sea:#2aa6ff;--sea-deep:#0b5fc3;--sand:#f5d49d;--foam:#ffffffcc;--gold:#ffd76a;--gold-deep:#f3b233;}#chat-box{position:relative;overflow:hidden;background:linear-gradient(to bottom,var(--sky)0%,#bfe7ff 25%,var(--sea)45%,var(--sea-deep)65%,var(--sand)100%);border:3px solid transparent;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:glowBorder 2.8s linear infinite;}@keyframes glowBorder{0%{box-shadow:0 0 0 rgba(0,0,0,0),0 0 20px rgba(255,215,106,.25) inset;}50%{box-shadow:0 0 0 rgba(0,0,0,0),0 0 38px rgba(255,215,106,.45) inset;}100%{box-shadow:0 0 0 rgba(0,0,0,0),0 0 20px rgba(255,215,106,.25) inset;}}#chat-box::before,#chat-box::after{content:"";position:absolute;left:0;width:200%;height:40%;pointer-events:none;}#chat-box::before{bottom:22%;background:radial-gradient(100px 16px at 10% 40%,var(--foam)20%,transparent 55%)repeat-x,radial-gradient(180px 24px at 40% 60%,var(--foam)18%,transparent 60%)repeat-x;background-size:220px 40px,360px 46px;opacity:.9;animation:wave1 6s linear infinite;}@keyframes wave1{from{transform:translateX(0);}to{transform:translateX(-50%);}}#chat-box::after{bottom:36%;background:radial-gradient(120px 12px at 20% 50%,var(--foam)22%,transparent 60%)repeat-x,radial-gradient(220px 18px at 60% 45%,var(--foam)18%,transparent 65%)repeat-x;background-size:260px 30px,420px 34px;opacity:.45;animation:wave2 9s linear infinite;}@keyframes wave2{from{transform:translateX(0);}to{transform:translateX(-50%);}}#chat-box .sand-gloss{position:absolute;inset:auto -20% 0 -20%;height:22%;background:linear-gradient(to top,rgba(255,226,170,.65),rgba(255,226,170,0));pointer-events:none;z-index:0;}#chat-box .sea-gloss{position:absolute;left:-20%;right:-20%;height:18%;bottom:36%;background:radial-gradient(60% 100% at 50% 100%,rgba(255,255,255,.25),transparent 70%);pointer-events:none;z-index:0;}.bubble{position:absolute;bottom:28%;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:inset 0 0 4px #fff;animation:rise 4.2s ease-in infinite;z-index:0;}@keyframes rise{0%{transform:translateY(0)scale(1);opacity:.8;}80%{opacity:.6;}100%{transform:translateY(-140px)scale(1.4);opacity:0;}}#chat-box .message.other{background:rgba(255,255,255,.88);color:#103049;border:1px solid rgba(255,255,255,.6);backdrop-filter:blur(3px);}#chat-box .message.me{background:linear-gradient(135deg,#ffef9c,#ffd76a);color:#5b3900;border:1px solid rgba(255,215,106,.8);box-shadow:0 6px 16px rgba(255,183,0,.25);}.money-pop{position:absolute;left:50%;bottom:24%;transform:translateX(-50%);pointer-events:none;z-index:2;}.coin{position:absolute;font-size:22px;will-change:transform,opacity;animation:coinUp 900ms cubic-bezier(.2,.8,.2,1) forwards,coinSpin 900ms linear infinite;text-shadow:0 2px 4px rgba(0,0,0,.25);}@keyframes coinUp{0%{transform:translate(var(--x,0),0)scale(.8);opacity:0;}10%{opacity:1;}100%{transform:translate(var(--x,0),calc(-140px - var(--yRand,0px)))scale(1.2);opacity:0;}}@keyframes coinSpin{from{filter:drop-shadow(0 0 0 rgba(0,0,0,0));}to{filter:drop-shadow(0 0 0 rgba(0,0,0,0));}}.music-toggle{position:absolute;top:8px;right:8px;z-index:5;background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:700;backdrop-filter:blur(4px);}</style><script>window.addEventListener('load',()=>{const b=document.getElementById('chat-box');if(!b)return;if(!b.querySelector('.sand-gloss')){const g1=document.createElement('div');g1.className='sea-gloss';const g2=document.createElement('div');g2.className='sand-gloss';b.appendChild(g1);b.appendChild(g2);}for(let i=0;i<12;i++){const e=document.createElement('div');e.className='bubble';e.style.left=Math.random()*90+'%';e.style.animationDelay=(Math.random()*4)+'s';e.style.opacity=0.5+Math.random()*0.4;b.appendChild(e);}});function beachMoneyFX(){const b=document.getElementById('chat-box');if(!b)return;const p=document.createElement('div');p.className='money-pop';b.appendChild(p);const a=['🪙','💰','💵','💸','🤑'];const c=14+Math.floor(Math.random()*8);for(let i=0;i<c;i++){const s=document.createElement('span');s.className='coin';s.textContent=a[Math.floor(Math.random()*a.length)];s.style.setProperty('--x',(Math.random()*220-110)+'px');s.style.setProperty('--yRand',(Math.random()*80|0)+'px');s.style.animationDelay=(Math.random()*120|0)+'ms';s.style.left=(Math.random()*80+10)+'%';s.style.fontSize=(18+Math.random()*14)+'px';p.appendChild(s);}setTimeout(()=>p.remove(),1200);}(()=>{const c=document.getElementById('chat-box');if(!c)return;const o=new MutationObserver(m=>{for(const x of m){if(x.type==='childList'&&x.addedNodes.length){const last=[...c.querySelectorAll('.message')].pop();if(last&&last.classList.contains('me'))beachMoneyFX();}}});o.observe(c,{childList:true});})();</script></html>
+     break;
+
+    case "staff":
+      /* ===== 黑铁员工特效区 ===== */
+      console.log("🌧️ 启用黑铁员工权限");
+      // 👉 在此插入下雨封禁动画代码
+	<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>全屏下雨·求雨特效</title><style>html,body{height:100%;margin:0;background:#0b1020;overflow:hidden}.bg{position:fixed;inset:0;background:radial-gradient(120% 80% at 50% -10%,#1d274b 0%,#0b1020 55%,#060912 100%);filter:contrast(1.1) brightness(.95);z-index:0}.flash{position:fixed;inset:0;background:#e9f2ff;opacity:0;pointer-events:none;z-index:3;transition:opacity .12s ease}.ui{position:fixed;left:12px;bottom:12px;z-index:4;background:rgba(10,14,26,.6);color:#dfe7ff;font:14px/1.2 system-ui,Segoe UI,Roboto,Helvetica,Arial;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;backdrop-filter:blur(6px)}.ui label{display:flex;gap:8px;align-items:center;margin:6px 0}.ui input[type=range]{width:180px}.ui button{border:none;border-radius:10px;padding:6px 10px;cursor:pointer;background:#2b3560;color:#fff}.ui .mini{opacity:.7;font-size:12px;margin-top:4px}</style></head><body><div class="bg"></div><canvas id="rain"></canvas><div class="flash" id="flash"></div><div class="ui"><label>雨量<input id="intensity" type="range" min="200" max="2000" step="50" value="900"><span id="intVal">900</span></label><label>风向<input id="wind" type="range" min="-2.5" max="2.5" step="0.1" value="0.8"><span id="windVal">0.8</span></label><label>速度<input id="speed" type="range" min="0.6" max="2.0" step="0.1" value="1.2"><span id="spdVal">1.2x</span></label><div style="display:flex;gap:8px;margin-top:6px"><button id="toggleFlash">⚡ 闪电</button><button id="toggleSplash">💧 溅射</button><button id="toggleUI">🫥 隐藏UI</button></div><div class="mini">提示：拖动雨量↑即可“求雨”更大；手机也可运行。</div></div><script>(()=>{const e=document.getElementById("rain"),t=e.getContext("2d"),n=document.getElementById("flash"),i=e=>document.getElementById(e),a=i("intensity"),o=i("wind"),r=i("speed"),l=i("intVal"),c=i("windVal"),d=i("spdVal"),s=i("toggleFlash"),h=i("toggleSplash"),f=i("toggleUI"),u=document.querySelector(".ui");let p=0,m=0,g=Math.min(window.devicePixelRatio||1,2),v=[],y=[],b=performance.now(),w=+a.value,x=+o.value,k=+r.value,S=!0,q=!0;function E(){p=e.width=Math.floor(innerWidth*g),m=e.height=Math.floor(innerHeight*g),e.style.width=innerWidth+"px",e.style.height=innerHeight+"px"}function M(){const e=Math.random()*.9+.1,t=(18+22*Math.random())*e,n=(900+600*Math.random())*e,i=200*x*e,a=Math.random()*p,o=-Math.random()*.2*m,r=.25+.5*e;return{x:a,y:o,vx:i,vy:n,len:t,a:r,z:e}}function L(e,t,n){if(!q)return;const i=2+(3*Math.random()|0);for(let a=0;a<i;a++){const i=-Math.PI/2+Math.random()*Math.PI,o=(80+120*Math.random())*n;y.push({x:e,y:t,vx:Math.cos(i)*o,vy:Math.sin(i)*o,life:220+180*Math.random(),z:n})}}function P(){const e=w-v.length;if(e>0)for(let t=0;t<Math.min(e,60);t++)v.push(M());else e<0&&v.splice(0,Math.min(-e,60))}function z(e){const n=Math.min(e-b,40)/1e3;b=e,P(),t.clearRect(0,0,p,m),t.globalCompositeOperation="lighter";for(let e=0;e<v.length;e++){const i=v[e];i.x+=i.vx*k*n*g,i.y+=i.vy*k*n*g,t.beginPath(),t.strokeStyle=`rgba(180,200,255,${i.a})`,t.lineWidth=Math.max(1,1.2*i.z*g),t.moveTo(i.x,i.y),t.lineTo(i.x-.02*i.vx,i.y-.02*i.vy-i.len*g),t.stroke(),i.y>m-2*g?(L(i.x,m-2*g,i.z),v[e]=M(),v[e].x=Math.random()*p):i.x<-50||i.x>p+50||i.y<-100&&(v[e]=M())}t.globalCompositeOperation="source-over";for(let e=y.length-1;e>=0;e--){const n=y[e];n.vy+=600*n*g;const i=Math.min(n.vy*0+n.vx*0,600*n*g);n.x+=n.vx*n*g,n.y+=n.vy*n*g,n.life-=1e3*n;const a=Math.max(0,n.life/400);t.fillStyle=`rgba(200,220,255,${a})`,t.beginPath(),t.arc(n.x,n.y,Math.max(.5,1.6*n.z*g),0,2*Math.PI),t.fill(),(n.y>m||n.life<=0)&&y.splice(e,1)}S&&Math.random()<.0025*(w/800)&&C(),requestAnimationFrame(z)}requestAnimationFrame(z);let T=0;function C(){const e=1+(2*Math.random()|0),t=[];for(let n=0;n<e;n++)t.push(60+120*Math.random()),n<e-1&&t.push(40+100*Math.random());let i=0;const a=()=>{if(i>=t.length)return void(n.style.opacity=0);const e=i%2==0?.18+.35*Math.random():0;n.style.opacity=e,clearTimeout(T),T=setTimeout(()=>{i++,a()},t[i])};a()}a.addEventListener("input",e=>{w=+e.target.value,l.textContent=w}),o.addEventListener("input",e=>{x=+e.target.value,c.textContent=x.toFixed(1)}),r.addEventListener("input",e=>{k=+e.target.value,d.textContent=k.toFixed(1)+"x"}),s.addEventListener("click",()=>{S=!S,s.textContent=S?"⚡ 闪电":"⚡ 关"}),h.addEventListener("click",()=>{q=!q,h.textContent=q?"💧 溅射":"💧 关"}),f.addEventListener("click",()=>{u.style.display="none"===u.style.display?"block":"none"});let B=!1;addEventListener("pointerdown",()=>{B=!B,w=B?Math.min(2e3,1.6*w|0):Math.max(200,.6*w|0),a.value=w,l.textContent=w},{passive:!0})})();</script></body></html>
+      break;
+  }
+}
+
+// 🔹 移除所有特效（点击关闭时执行）
+function removeVipEffect() {
+  console.log("🧹 已清除当前特效");
+  // 👉 这里写恢复默认聊天背景、移除动画等
+}
 </script>
 
         </body>
