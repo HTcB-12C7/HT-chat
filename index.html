@@ -568,6 +568,48 @@ if (user) {
 }
   usernameReady = true;
 });
+// --- 新消息提醒 & “不在底部不自动滚动” ---
+chatBox.style.position = 'relative';   // 方便把按钮绝对定位在聊天框内
+let unreadCount = 0;
+
+// 小浮窗按钮
+const newMsgTip = document.createElement('button');
+newMsgTip.id = 'newMsgTip';
+newMsgTip.textContent = '有新消息，点此查看';
+Object.assign(newMsgTip.style, {
+  position: 'absolute',
+  bottom: '10px',
+  right: '10px',
+  padding: '6px 10px',
+  borderRadius: '8px',
+  border: 'none',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  display: 'none',
+  background: '#ffcc66',
+  color: '#000',
+  boxShadow: '0 0 10px rgba(0,0,0,.3)',
+  zIndex: '5',
+});
+newMsgTip.addEventListener('click', () => {
+  chatBox.scrollTop = chatBox.scrollHeight;  // 滚到底
+  unreadCount = 0;
+  newMsgTip.style.display = 'none';
+});
+chatBox.appendChild(newMsgTip);
+
+function isNearBottom(el, threshold = 40) {
+  // 距底部 <= threshold px 认为“在底部”
+  return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+}
+
+// 手动滚动到接近底部时，清除未读提示
+chatBox.addEventListener('scroll', () => {
+  if (isNearBottom(chatBox)) {
+    unreadCount = 0;
+    newMsgTip.style.display = 'none';
+  }
+});
 
 // --- 监听消息 ---
 onChildAdded(messagesRef, (snapshot) => {
@@ -610,7 +652,9 @@ else if (level === "staff") {
 }
 
 	
-chatBox.innerHTML += `
+const wasAtBottom = isNearBottom(chatBox);   // 追加前，先判断是否在底部
+
+const msgHtml = `
   <div class="message ${msgClass}" style="display:flex;align-items:flex-start;gap:8px;">
     ${isMe ? "" : `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">`}
     <div style="max-width:80%;">
@@ -620,7 +664,19 @@ chatBox.innerHTML += `
     ${isMe ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">` : ""}
   </div>`;
 
+// 关键：不要用 innerHTML +=（会重建整个子树，导致提示按钮和事件丢失）
+chatBox.insertAdjacentHTML('beforeend', msgHtml);
+
+if (wasAtBottom) {
+  // 只有在原本就在底部时才跟随新消息滚动
   chatBox.scrollTop = chatBox.scrollHeight;
+} else {
+  // 不在底部：累计未读，并显示提示按钮
+  unreadCount += 1;
+  newMsgTip.textContent = `有 ${unreadCount} 条新消息，点此查看`;
+  newMsgTip.style.display = 'inline-block';
+}
+
 });
 // ✅ 监听在线用户变化
 import { onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
