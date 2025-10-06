@@ -19,18 +19,36 @@
 
 /* 聊天框样式 */
 /* 聊天框整体背景 */
+/* 最外层 main-container 改成纵向布局，让中间可撑满 */
+.main-container {
+  display: block !important;
+}
+
+/* 聊天区域真正的背景框：强制占满视口宽度 */
+.container {
+  width: 95vw !important;   /* 占视口宽度的95%，而不是px */
+  max-width: none !important;
+  margin: 20px auto !important;
+  padding: 30px !important;
+  background: #111 !important;
+  border-radius: 17px !important;
+  box-shadow: 0 0 27px rgba(0,0,0,0.6) !important;
+}
+
+/* 聊天内容里的chat-box占满剩余空间 */
+#chat-container {
+  display: flex;
+  width: 100% !important;
+}
+
 #chat-box {
-  width: 100%;               /* ✅ 宽度拉宽，占页面95% */
-  height: 60vh;             /* ✅ 高度缩短到60%视口 */
+  flex: 1;
+  height: 60vh;
+  background: saddlebrown;
+  border-radius: 10px;
   border: 2px solid #333;
   overflow-y: auto;
-  margin: 10px auto;        /* ✅ 居中显示 */
   padding: 15px;
-  background: saddlebrown;  /* ✅ 棕色背景 */
-  display: flex;
-  flex-direction: column;
-  font-size: 16px;
-  border-radius: 10px;      /* ✅ 圆角更好看 */
 }
 
 /* 消息基础样式 */
