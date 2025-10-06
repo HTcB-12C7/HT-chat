@@ -761,9 +761,36 @@ document.getElementById("saveBtn").onclick = async () => {
 };
 </script>
 <script>
-// 🔹 模拟从数据库读取的 VIP 等级
-// 实际开发中，这个值从 Firebase 获取，例如 data.vipLevel
-let userVipLevel = "vip"; // ← 测试可先改为 vip/super/supergod/staff
+// 🔹 从 Firebase 自动加载 vipLevel
+let userVipLevel = "none"; // 默认不是VIP
+
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+const dbCheck = getDatabase();
+const authCheck = getAuth();
+
+// 登录状态改变时，从 users/${uid} 拉取 vipLevel
+onAuthStateChanged(authCheck, async (user) => {
+  if (user) {
+    try {
+      const userRef = ref(dbCheck, "users/" + user.uid);
+      const snap = await get(userRef);
+      if (snap.exists()) {
+        const data = snap.val();
+        userVipLevel = data.vipLevel || "none";
+        console.log("✅ 当前VIP等级：", userVipLevel);
+      } else {
+        console.log("⚠️ 用户数据未找到，默认为 none");
+      }
+    } catch (err) {
+      console.error("❌ 获取VIP等级失败：", err);
+    }
+  } else {
+    console.log("🟡 未登录用户，VIP等级 none");
+    userVipLevel = "none";
+  }
+});
 
 // 🔹 当前是否启用了特效
 let activeEffect = null;
