@@ -785,6 +785,8 @@ document.getElementById("saveBtn").onclick = async () => {
 };
 </script>
 <script type="module">
++ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
++ import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 // 🔹 从 Firebase 自动加载 vipLevel
 window.userVipLevel = "none";
 window.activeEffect = null;
