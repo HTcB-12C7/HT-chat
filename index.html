@@ -91,9 +91,51 @@
   margin-bottom: 2px;/* 和昵称有一点间距 */
 }	
 </style>
-<audio id="bgm" autoplay loop muted playsinline width="0" height="0">
-  <source src="https://htcb-12c7.github.io/htgov/assets/Wake_up_cd.m4a" type="audio/mp4">
-</audio>
+<audio id="bgm" autoplay muted playsinline></audio>
+
+<script>
+const songs = [
+  "https://htcb-12c7.github.io/htgov/assets/Wake_up_cd.m4a",
+  "https://htcb-12c7.github.io/htgov/assets/word fun fun.m4a",
+  "https://htcb-12c7.github.io/htgov/assets/WUHA.m4a",
+  "https://htcb-12c7.github.io/htgov/assets/AF ED.m4a",
+  "https://htcb-12c7.github.io/htgov/assets/DK X2.m4a"
+];
+
+const bgm = document.getElementById("bgm");
+const titleBox = document.createElement("div");
+titleBox.style.cssText = `
+  position: fixed; bottom: 8px; right: 12px;
+  color: gold; font-size: 14px; font-weight: bold;
+  text-shadow: 0 0 5px black; z-index: 9999;
+`;
+document.body.appendChild(titleBox);
+
+// ✅ 随机选择并播放一首
+function playRandomSong() {
+  const randomIndex = Math.floor(Math.random() * songs.length);
+  const song = songs[randomIndex];
+  bgm.src = song;
+  bgm.play().catch(err => console.log("播放失败：", err));
+  titleBox.textContent = "🎵 正在播放：" + decodeURIComponent(song.split("/").pop());
+}
+
+// ✅ 点击或按键解除静音
+function enableBgm() {
+  bgm.muted = false;
+  bgm.play().catch(err => console.log("播放失败：", err));
+}
+
+document.addEventListener('click', enableBgm, { once: true });
+document.addEventListener('keydown', enableBgm, { once: true });
+document.addEventListener('touchstart', enableBgm, { once: true });
+
+// ✅ 每首歌播完自动切换下一首随机
+bgm.addEventListener("ended", playRandomSong);
+
+// ✅ 页面加载时随机播一首
+window.addEventListener("load", playRandomSong);
+</script>	
 
 <script>
   // 用户点击后解除静音
