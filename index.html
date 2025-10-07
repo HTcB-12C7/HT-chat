@@ -963,83 +963,169 @@ function applyVipEffect(level) {
       break;
 
     // 🏖️ 超级无敌VIP：修复后的海滩模式（不卡顿）
+// 🏖️ 黑铁超级无敌VIP（夏日海滩·加钱风）
 case "supergod":
-  const box = document.getElementById("chat-box");
+  removeVipEffect(); // 先清理旧特效
 
-  // --- 删除旧的特效（避免重复）
-  removeVipEffect();
-
-  // --- 样式 ---
+  // === 注入样式 ===
   const css = document.createElement("style");
   css.id = "beachCSS";
   css.textContent = `
-    #chat-box {
+    :root{
+      --sky:#8fd3ff;
+      --sea:#2aa6ff;
+      --sea-deep:#0b5fc3;
+      --sand:#f5d49d;
+      --foam:#ffffffcc;
+      --gold:#ffd76a;
+      --gold-deep:#f3b233;
+    }
+    #chat-box{
       position: relative;
-      background: linear-gradient(to bottom, #8fd3ff 0%, #bfe7ff 25%, #2aa6ff 45%, #0b5fc3 65%, #f5d49d 100%);
+      overflow: hidden;
+      background: linear-gradient(to bottom, var(--sky) 0%, #bfe7ff 25%, var(--sea) 45%, var(--sea-deep) 65%, var(--sand) 100%);
       border: 3px solid transparent;
       border-radius: 14px;
-      box-shadow: 0 0 25px rgba(255,215,106,.6) inset, 0 0 20px rgba(0,0,0,.3);
-      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      animation: glowBorder 2.8s linear infinite;
     }
-
-    @keyframes rise {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-120px); opacity: 0; }
+    @keyframes glowBorder{
+      0%{ box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 20px rgba(255,215,106,.25) inset; }
+      50%{ box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 38px rgba(255,215,106,.45) inset; }
+      100%{ box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 20px rgba(255,215,106,.25) inset; }
     }
-
-    .bubble {
-      position: absolute;
-      bottom: 15%;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.8);
-      animation: rise 6s ease-in infinite;
-      pointer-events: none;
+    #chat-box::before,#chat-box::after{
+      content:"";
+      position:absolute;left:0;width:200%;height:40%;pointer-events:none;
     }
-
-    .coin {
-      position: absolute;
-      font-size: 22px;
-      animation: coinFly 1s ease-out forwards;
-      text-shadow: 0 1px 4px rgba(0,0,0,.25);
+    #chat-box::before{
+      bottom:22%;
+      background:
+        radial-gradient(100px 16px at 10% 40%, var(--foam) 20%, transparent 55%) repeat-x,
+        radial-gradient(180px 24px at 40% 60%, var(--foam) 18%, transparent 60%) repeat-x;
+      background-size: 220px 40px, 360px 46px;
+      opacity:.9;
+      animation: wave1 6s linear infinite;
     }
-    @keyframes coinFly {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-100px) scale(1.4); opacity: 0; }
+    @keyframes wave1{ from{transform:translateX(0);}to{transform:translateX(-50%);} }
+    #chat-box::after{
+      bottom:36%;
+      background:
+        radial-gradient(120px 12px at 20% 50%, var(--foam) 22%, transparent 60%) repeat-x,
+        radial-gradient(220px 18px at 60% 45%, var(--foam) 18%, transparent 65%) repeat-x;
+      background-size: 260px 30px, 420px 34px;
+      opacity:.45;
+      animation: wave2 9s linear infinite;
     }
+    @keyframes wave2{ from{transform:translateX(0);}to{transform:translateX(-50%);} }
+    .sand-gloss{
+      position:absolute;inset:auto -20% 0 -20%;height:22%;
+      background:linear-gradient(to top,rgba(255,226,170,.65),rgba(255,226,170,0));
+      pointer-events:none;z-index:0;
+    }
+    .sea-gloss{
+      position:absolute;left:-20%;right:-20%;height:18%;bottom:36%;
+      background:radial-gradient(60% 100% at 50% 100%,rgba(255,255,255,.25),transparent 70%);
+      pointer-events:none;z-index:0;
+    }
+    .bubble{
+      position:absolute;bottom:28%;width:6px;height:6px;border-radius:50%;
+      background:rgba(255,255,255,.7);
+      box-shadow:inset 0 0 4px #fff;
+      animation:rise 4.2s ease-in infinite;z-index:0;
+    }
+    @keyframes rise{
+      0%{transform:translateY(0) scale(1);opacity:.8;}
+      80%{opacity:.6;}
+      100%{transform:translateY(-140px) scale(1.4);opacity:0;}
+    }
+    #chat-box .message.other{
+      background:rgba(255,255,255,.88);
+      color:#103049;
+      border:1px solid rgba(255,255,255,.6);
+      backdrop-filter:blur(3px);
+    }
+    #chat-box .message.me{
+      background:linear-gradient(135deg,#ffef9c,#ffd76a);
+      color:#5b3900;
+      border:1px solid rgba(255,215,106,.8);
+      box-shadow:0 6px 16px rgba(255,183,0,.25);
+    }
+    .money-pop{
+      position:absolute;left:50%;bottom:24%;
+      transform:translateX(-50%);
+      pointer-events:none;z-index:2;
+    }
+    .coin{
+      position:absolute;font-size:22px;
+      animation:coinUp 900ms cubic-bezier(.2,.8,.2,1) forwards,coinSpin 900ms linear infinite;
+      text-shadow:0 2px 4px rgba(0,0,0,.25);
+    }
+    @keyframes coinUp{
+      0%{transform:translate(var(--x,0),0) scale(.8);opacity:0;}
+      10%{opacity:1;}
+      100%{transform:translate(var(--x,0),calc(-140px - var(--yRand,0px))) scale(1.2);opacity:0;}
+    }
+    @keyframes coinSpin{from{filter:none;}to{filter:none;}}
   `;
   document.head.appendChild(css);
 
-  // 🌊 创建泡泡层（10个）
-  for (let i = 0; i < 10; i++) {
+  // === 初始化海滩氛围 ===
+  const box = document.getElementById("chat-box");
+  if (!box) break;
+  if (!box.querySelector(".sand-gloss")) {
+    const glossSea = document.createElement("div");
+    glossSea.className = "sea-gloss";
+    const glossSand = document.createElement("div");
+    glossSand.className = "sand-gloss";
+    box.append(glossSea, glossSand);
+  }
+
+  // 随机泡泡
+  for (let i = 0; i < 12; i++) {
     const b = document.createElement("div");
     b.className = "bubble";
-    b.style.left = Math.random() * 100 + "%";
-    b.style.animationDelay = (Math.random() * 6).toFixed(2) + "s";
+    b.style.left = Math.random() * 90 + "%";
+    b.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
     box.appendChild(b);
   }
 
-  // 🌴 仅监听“我”发送的消息，并做金币动画（限制频率）
-  let lastEffectTime = 0;
-  const icons = ["🪙","💰","💵","💸"];
-  const observer = new MutationObserver(() => {
-    const now = Date.now();
-    if (now - lastEffectTime < 800) return; // 限制频率，防爆卡
-    lastEffectTime = now;
+  // === 加钱爆炸逻辑 ===
+  function beachMoneyFX(){
+    const burst = document.createElement("div");
+    burst.className = "money-pop";
+    box.appendChild(burst);
 
-    const last = [...box.querySelectorAll(".message.me")].pop();
-    if (!last) return;
+    const icons = ['🪙','💰','💵','💸','🤑'];
+    const count = 14 + Math.floor(Math.random() * 8);
 
-    const coin = document.createElement("span");
-    coin.className = "coin";
-    coin.textContent = icons[Math.floor(Math.random() * icons.length)];
-    coin.style.left = (50 + (Math.random() * 20 - 10)) + "%";
-    box.appendChild(coin);
-    setTimeout(() => coin.remove(), 1000);
+    for(let i=0;i<count;i++){
+      const span = document.createElement('span');
+      span.className = 'coin';
+      span.textContent = icons[Math.floor(Math.random()*icons.length)];
+      span.style.setProperty('--x', (Math.random()*220-110)+'px');
+      span.style.setProperty('--yRand', (Math.random()*80|0)+'px');
+      span.style.animationDelay = (Math.random()*120|0)+'ms';
+      span.style.left = (Math.random()*80 + 10)+'%';
+      span.style.fontSize = (18 + Math.random()*14)+'px';
+      burst.appendChild(span);
+    }
+    setTimeout(()=>burst.remove(), 1200);
+  }
+
+  // === 自动监听我发的消息 ===
+  if (window.superGodObserver) window.superGodObserver.disconnect();
+  window.superGodObserver = new MutationObserver(muts=>{
+    for(const m of muts){
+      if(m.type==='childList' && m.addedNodes.length){
+        const last = [...box.querySelectorAll('.message')].pop();
+        if(last && last.classList.contains('me')){
+          beachMoneyFX();
+        }
+      }
+    }
   });
-
-  observer.observe(box, { childList: true });
-  window.superGodObserver = observer;
+  window.superGodObserver.observe(box, {childList:true});
   break;
 		  
     // 🌧️ 员工模式（保持不变）
