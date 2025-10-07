@@ -676,6 +676,10 @@ if (wasAtBottom) {
   newMsgTip.textContent = `有 ${unreadCount} 条新消息，点此查看`;
   newMsgTip.style.display = 'inline-block';
 }
+if (msgData.uid !== currentUserId && msgData.effect) {
+  // 别人发送消息时携带 effect 信息，播放他特效
+  applyVipEffect(msgData.effect);
+}
 
 });
 // ✅ 监听在线用户变化
@@ -755,19 +759,18 @@ window.sendMsg = async function () {
     }
 
     // 确保 VIP 状态稳定（避免 null）
-const vipLevelToSend = window.activeEffect && window.activeEffect !== "none"
-  ? window.activeEffect
-  : window.userVipLevel || "none";
+const vipLevelToSend = window.userVipLevel || "none";
 
     // ✅ 核心发送逻辑
-    await push(messagesRef, {
-      uid: currentUserId,
-      user: username,
-      text,
-      time: Date.now(),
-      avatar: avatarURL,
-      vipLevel: vipLevelToSend
-    });
+await push(messagesRef, {
+  uid: currentUserId,
+  user: username,
+  text,
+  time: Date.now(),
+  avatar: avatarURL,
+  vipLevel: vipLevelToSend,
+  effect: window.activeEffect || "none"
+});
 
     // 清空输入框
     msgInput.value = "";
@@ -898,6 +901,11 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
       activeEffect = level;
       alert("✨ 特效已开启！");
     }
+	  // ✅ 同步当前特效状态到数据库
+if (auth.currentUser) {
+  const userEffectRef = ref(db, "users/" + auth.currentUser.uid + "/activeEffect");
+  set(userEffectRef, activeEffect || "none");
+}
   });
 });
 
