@@ -903,20 +903,14 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
 
 // 🔹 特效函数
 // 🔹 特效函数（优化版）
+// === 不卡死版 VIP 特效（替换同名函数） ===
 function applyVipEffect(level) {
-removeVipEffect();
-
-// ✅ 只给 vip / super 创建样式标签
-let style = null;
-if (level === "vip" || level === "super") {
-  style = document.createElement("style");
-  style.id = `${level}Style`;
-  document.head.appendChild(style);
-}
+  removeVipEffect(); // 先干净地清理
 
   switch (level) {
-    // 🍫 黑铁VIP：我的消息气泡炫彩边框 + 动态文字流光
-    case "vip":
+    case "vip": {
+      const style = document.createElement("style");
+      style.id = "vipStyle";
       style.textContent = `
         .message.me {
           background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown);
@@ -927,211 +921,231 @@ if (level === "vip" || level === "super") {
           animation: vipMove 4s linear infinite;
           border: 2px solid transparent;
           border-image: linear-gradient(45deg, saddlebrown, black, orange) 1;
-          text-shadow: 0 0 10px rgba(139,69,19,0.6),
-                       0 0 20px rgba(255,140,0,0.6);
+          text-shadow: 0 0 10px rgba(139,69,19,0.6), 0 0 20px rgba(255,140,0,0.6);
+          will-change: background-position;
         }
         @keyframes vipMove {
           0% { background-position: 0% 50%; }
           100% { background-position: 100% 50%; }
         }
       `;
+      document.head.appendChild(style);
       break;
+    }
 
-    // 🔥 黑铁超级VIP：我的消息气泡威压震动 + 红橙光晕
-    case "super":
+    case "super": {
+      const style = document.createElement("style");
+      style.id = "superStyle";
       style.textContent = `
         .message.me {
           font-weight: bold;
           color: #ff3c00;
-          text-shadow: 0 0 10px #ff3c00,
-                       0 0 20px #ff6a00,
-                       0 0 40px #ff0000,
-                       0 0 80px #ff0000;
-          animation: superPulse 1.2s infinite alternate ease-in-out,
-                     superShake 0.12s infinite linear;
+          text-shadow: 0 0 10px #ff3c00, 0 0 20px #ff6a00;
+          animation: superPulse 1.2s infinite alternate ease-in-out;
+          will-change: transform;
         }
         @keyframes superPulse {
-          0% { transform: scale(1); color: #ff3c00; }
-          50% { transform: scale(1.2); color: #ff0000;
-                text-shadow: 0 0 20px #ff0000,
-                             0 0 40px #ff6600,
-                             0 0 80px #ff0000; }
-          100% { transform: scale(1.1); color: #ffa500; }
-        }
-        @keyframes superShake {
-          0%,100% { transform: translate(0,0); }
-          25% { transform: translate(-1px,1px); }
-          50% { transform: translate(2px,-1px); }
-          75% { transform: translate(-1px,2px); }
+          0% { transform: scale(1); }
+          100% { transform: scale(1.1); }
         }
       `;
+      document.head.appendChild(style);
       break;
-
-    // 🏖️ 超级无敌VIP：修复后的海滩模式（不卡顿）
-// 🏖️ 黑铁超级无敌VIP（夏日海滩·加钱风）
-case "supergod": {
-  // === 注入样式（保持你原来的视觉，但轻一些） ===
-  const css = document.createElement("style");
-  css.id = "beachCSS";
-  css.textContent = `
-    :root{
-      --sky:#8fd3ff; --sea:#2aa6ff; --sea-deep:#0b5fc3;
-      --sand:#f5d49d; --foam:#ffffffcc;
-      --gold:#ffd76a; --gold-deep:#f3b233;
-    }
-    #chat-box{
-      position:relative; overflow:hidden;
-      background:linear-gradient(to bottom,var(--sky) 0%,#bfe7ff 25%,var(--sea) 45%,var(--sea-deep) 65%,var(--sand) 100%);
-      border:3px solid transparent; border-radius:14px;
-      animation:glowBorder 2.8s linear infinite;
-    }
-    @keyframes glowBorder{
-      0%{ box-shadow:0 0 20px rgba(255,215,106,.25) inset; }
-      50%{ box-shadow:0 0 38px rgba(255,215,106,.45) inset; }
-      100%{ box-shadow:0 0 20px rgba(255,215,106,.25) inset; }
-    }
-    #chat-box::before,#chat-box::after{
-      content:""; position:absolute; left:0; width:200%; height:40%; pointer-events:none;
-    }
-    #chat-box::before{
-      bottom:22%;
-      background:
-        radial-gradient(100px 16px at 10% 40%, var(--foam) 20%, transparent 55%) repeat-x,
-        radial-gradient(180px 24px at 40% 60%, var(--foam) 18%, transparent 60%) repeat-x;
-      background-size:220px 40px,360px 46px; opacity:.9;
-      animation:wave1 6s linear infinite;
-    }
-    @keyframes wave1{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
-    #chat-box::after{
-      bottom:36%;
-      background:
-        radial-gradient(120px 12px at 20% 50%, var(--foam) 22%, transparent 60%) repeat-x,
-        radial-gradient(220px 18px at 60% 45%, var(--foam) 18%, transparent 65%) repeat-x;
-      background-size:260px 30px,420px 34px; opacity:.45;
-      animation:wave2 9s linear infinite;
-    }
-    @keyframes wave2{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
-
-    .sea-gloss{ position:absolute; left:-20%; right:-20%; height:18%; bottom:36%;
-      background:radial-gradient(60% 100% at 50% 100%, rgba(255,255,255,.25), transparent 70%); pointer-events:none; z-index:0; }
-    .sand-gloss{ position:absolute; inset:auto -20% 0 -20%; height:22%;
-      background:linear-gradient(to top, rgba(255,226,170,.65), rgba(255,226,170,0)); pointer-events:none; z-index:0; }
-
-    .bubble{ position:absolute; bottom:28%; width:6px; height:6px; border-radius:50%;
-      background:rgba(255,255,255,.7); box-shadow:inset 0 0 4px #fff; animation:rise 4.2s ease-in infinite; z-index:0; }
-    @keyframes rise{ 0%{transform:translateY(0) scale(1);opacity:.8;} 80%{opacity:.6;} 100%{transform:translateY(-140px) scale(1.4);opacity:0;} }
-
-    #chat-box .message.other{
-      background:rgba(255,255,255,.88); color:#103049;
-      border:1px solid rgba(255,255,255,.6); backdrop-filter:blur(3px);
-    }
-    #chat-box .message.me{
-      background:linear-gradient(135deg,#ffef9c,#ffd76a);
-      color:#5b3900; border:1px solid rgba(255,215,106,.8); box-shadow:0 6px 16px rgba(255,183,0,.25);
     }
 
-    .money-pop{ position:absolute; left:50%; bottom:24%; transform:translateX(-50%); pointer-events:none; z-index:2; }
-    .coin{ position:absolute; font-size:22px; text-shadow:0 2px 4px rgba(0,0,0,.25);
-      animation:coinUp 900ms cubic-bezier(.2,.8,.2,1) forwards; }
-    @keyframes coinUp{
-      0%{ transform:translate(var(--x,0),0) scale(.8); opacity:0; }
-      10%{ opacity:1; }
-      100%{ transform:translate(var(--x,0),calc(-140px - var(--yRand,0px))) scale(1.2); opacity:0; }
-    }
-  `;
-  document.head.appendChild(css);
-
-  const box = document.getElementById("chat-box");
-  if (!box) break;
-
-  // 光泽层只添加一次
-  if (!box.querySelector(".sea-gloss")) {
-    const glossSea  = document.createElement("div"); glossSea.className  = "sea-gloss";
-    const glossSand = document.createElement("div"); glossSand.className = "sand-gloss";
-    box.append(glossSea, glossSand);
-  }
-
-  // 泡泡只在首次启用时批量创建
-  if (!box.querySelector(".bubble")) {
-    for (let i = 0; i < 12; i++) {
-      const b = document.createElement("div");
-      b.className = "bubble";
-      b.style.left = Math.random() * 90 + "%";
-      b.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
-      box.appendChild(b);
-    }
-  }
-
-  // 加钱：节流，避免短时间内多次触发
-  let lastBurstAt = 0;
-  function beachMoneyFX() {
-    const now = performance.now();
-    if (now - lastBurstAt < 350) return;   // 350ms 节流
-    lastBurstAt = now;
-
-    const burst = document.createElement("div");
-    burst.className = "money-pop";
-    box.appendChild(burst);
-
-    const icons = ["🪙","💰","💵","💸","🤑"];
-    const count = 14 + Math.floor(Math.random() * 8);
-    for (let i = 0; i < count; i++) {
-      const span = document.createElement("span");
-      span.className = "coin";
-      span.textContent = icons[Math.floor(Math.random() * icons.length)];
-      span.style.setProperty("--x", (Math.random() * 220 - 110) + "px");
-      span.style.setProperty("--yRand", (Math.random() * 80 | 0) + "px");
-      span.style.left = (Math.random() * 80 + 10) + "%";
-      span.style.fontSize = (18 + Math.random() * 14) + "px";
-      span.style.animationDelay = (Math.random() * 120 | 0) + "ms";
-      burst.appendChild(span);
-    }
-    setTimeout(() => burst.remove(), 1200);
-  }
-
-  // 只在“新增的 .message.me”出现时触发；忽略其他新增（例如 money-pop 自己）
-  if (window.superGodObserver) window.superGodObserver.disconnect();
-  window.superGodObserver = new MutationObserver(muts => {
-    for (const m of muts) {
-      for (const n of m.addedNodes) {
-        if (!(n instanceof HTMLElement)) continue;
-        if (n.classList.contains("message") && n.classList.contains("me")) {
-          beachMoneyFX();
+    case "supergod": {
+      // 样式尽量轻：只做 transform/opacity 动画 + will-change，避免阴影动画
+      const style = document.createElement("style");
+      style.id = "supergodStyle";
+      style.textContent = `
+        #chat-box{
+          position:relative; overflow:hidden;
+          background:linear-gradient(to bottom,#8fd3ff 0%,#bfe7ff 25%,#2aa6ff 45%,#0b5fc3 65%,#f5d49d 100%);
         }
+        #chat-box::before,#chat-box::after{
+          content:""; position:absolute; left:0; width:200%; height:40%; pointer-events:none;
+          will-change: transform;
+        }
+        #chat-box::before{
+          bottom:22%;
+          background:
+            radial-gradient(100px 16px at 10% 40%, rgba(255,255,255,.85) 20%, transparent 55%) repeat-x,
+            radial-gradient(180px 24px at 40% 60%, rgba(255,255,255,.75) 18%, transparent 60%) repeat-x;
+          background-size:220px 40px,360px 46px; opacity:.8;
+          animation:wave1 8s linear infinite;
+        }
+        #chat-box::after{
+          bottom:36%;
+          background:
+            radial-gradient(120px 12px at 20% 50%, rgba(255,255,255,.6) 22%, transparent 60%) repeat-x,
+            radial-gradient(220px 18px at 60% 45%, rgba(255,255,255,.55) 18%, transparent 65%) repeat-x;
+          background-size:260px 30px,420px 34px; opacity:.35;
+          animation:wave2 12s linear infinite;
+        }
+        @keyframes wave1 { from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+        @keyframes wave2 { from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+
+        #chat-box .message.other{
+          background:rgba(255,255,255,.9); color:#102a44; border:1px solid rgba(255,255,255,.6);
+        }
+        #chat-box .message.me{
+          background:linear-gradient(135deg,#fff5b5,#ffd76a); color:#4b2a00;
+          border:1px solid rgba(255,215,106,.8);
+        }
+
+        .bubble{
+          position:absolute; bottom:28%; width:6px; height:6px; border-radius:50%;
+          background:rgba(255,255,255,.7); box-shadow:inset 0 0 3px #fff;
+          animation:rise 4s ease-in infinite; will-change: transform, opacity;
+        }
+        @keyframes rise{
+          0%{ transform:translateY(0) scale(1); opacity:.8; }
+          100%{ transform:translateY(-130px) scale(1.2); opacity:0; }
+        }
+
+        .money-pop{ position:absolute; left:50%; bottom:24%; transform:translateX(-50%); pointer-events:none; }
+        .coin{
+          position:absolute; font-size:20px;
+          animation:coinUp .9s cubic-bezier(.2,.8,.2,1) forwards;
+          will-change: transform, opacity;
+        }
+        @keyframes coinUp{
+          0%{ transform:translate(var(--x,0),0) scale(.8); opacity:0; }
+          20%{ opacity:1; }
+          100%{ transform:translate(var(--x,0), calc(-140px - var(--yRand,0px))) scale(1.1); opacity:0; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const box = document.getElementById("chat-box");
+      if (!box) break;
+
+      // 轻量泡泡：8 个就够（避免堆积）
+      for (let i = 0; i < 8; i++) {
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.style.left = Math.random() * 90 + "%";
+        b.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
+        box.appendChild(b);
       }
-    }
-  });
-  window.superGodObserver.observe(box, { childList: true });
-  break;
-}
 
-		  
-    // 🌧️ 员工模式（保持不变）
-    case "staff":
-      const rainCanvas = document.createElement("canvas");
-      rainCanvas.id = "rainCanvas";
-      rainCanvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:9999;pointer-events:none;";
-      document.body.appendChild(rainCanvas);
-      const ctx = rainCanvas.getContext("2d");
-      let W,H;const DPR=Math.min(window.devicePixelRatio||1,2);
-      function resize(){W=rainCanvas.width=innerWidth*DPR;H=rainCanvas.height=innerHeight*DPR;}
-      window.addEventListener("resize",resize);resize();
-      let drops=[];for(let i=0;i<400;i++){drops.push({x:Math.random()*W,y:Math.random()*H,vx:0,vy:900*Math.random(),len:15});}
-      function draw(){
-        ctx.clearRect(0,0,W,H);
-        ctx.strokeStyle="rgba(180,200,255,0.7)";
-        for(let d of drops){
-          ctx.beginPath();
-          ctx.moveTo(d.x,d.y);
-          ctx.lineTo(d.x,d.y-d.len);
-          ctx.stroke();
-          d.y+=d.vy*0.016;
-          if(d.y>H)d.y=-20;
+      // 撒钱动画（限流防抖：≥700ms 才触发一次）
+      let lastBurstAt = 0;
+      function beachMoneyFX(){
+        const now = performance.now();
+        if (now - lastBurstAt < 700) return;
+        lastBurstAt = now;
+
+        const burst = document.createElement("div");
+        burst.className = "money-pop";
+        box.appendChild(burst);
+
+        const icons = ['🪙','💰','💵','💸','🤑'];
+        const count = 10; // 控制数量，防止爆显存/CPU
+        for (let i = 0; i < count; i++) {
+          const span = document.createElement("span");
+          span.className = "coin";
+          span.textContent = icons[Math.floor(Math.random()*icons.length)];
+          span.style.setProperty("--x", (Math.random()*220-110) + "px");
+          span.style.setProperty("--yRand", (Math.random()*80|0) + "px");
+          span.style.left = (Math.random()*80 + 10) + "%";
+          span.style.fontSize = (18 + Math.random()*10) + "px";
+          span.style.animationDelay = (Math.random()*120|0) + "ms";
+          burst.appendChild(span);
         }
-        requestAnimationFrame(draw);
+        setTimeout(() => burst.remove(), 1100);
+      }
+
+      // 只观察新增的“我”的气泡，且只观察一层，避免多次触发
+      window.__superGodObserver = new MutationObserver(muts => {
+        for (const m of muts) {
+          for (const node of m.addedNodes) {
+            if (node.nodeType === 1 &&
+                node.classList.contains("message") &&
+                node.classList.contains("me")) {
+              beachMoneyFX();
+            }
+          }
+        }
+      });
+      window.__superGodObserver.observe(box, { childList: true });
+      break;
+    }
+
+    case "staff": {
+      // 支持完整关闭：可取消动画帧 + 移除监听
+      const canvas = document.createElement("canvas");
+      canvas.id = "rainCanvas";
+      canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:9999;pointer-events:none;";
+      document.body.appendChild(canvas);
+
+      const ctx = canvas.getContext("2d");
+      const DPR = Math.min(window.devicePixelRatio || 1, 2);
+      function resize(){
+        canvas.width = innerWidth * DPR;
+        canvas.height = innerHeight * DPR;
+      }
+      window.__rainResize = resize;
+      resize();
+      window.addEventListener("resize", resize);
+
+      window.__rainStop = false;
+      const drops = Array.from({length: 280}, () => ({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        vy: 600 + Math.random()*600,
+        len: 12 + Math.random()*12
+      }));
+
+      function draw(){
+        if (window.__rainStop) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgba(180,200,255,0.6)";
+        ctx.lineWidth = 1 * DPR;
+        for (const d of drops) {
+          ctx.beginPath();
+          ctx.moveTo(d.x, d.y);
+          ctx.lineTo(d.x, d.y - d.len);
+          ctx.stroke();
+          d.y += d.vy * 0.016;
+          if (d.y > canvas.height) d.y = -20;
+        }
+        window.__rainRAF = requestAnimationFrame(draw);
       }
       draw();
       break;
+    }
+  }
+}
+
+// === 清理函数（替换同名函数） ===
+function removeVipEffect() {
+  // 清理样式
+  ["vipStyle","superStyle","supergodStyle","beachCSS"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+
+  // 停止并清理“超级无敌”观察器和节点
+  if (window.__superGodObserver) {
+    window.__superGodObserver.disconnect();
+    window.__superGodObserver = null;
+  }
+  document.querySelectorAll(".bubble,.money-pop,.supergod-title,.sea-gloss,.sand-gloss")
+    .forEach(el => el.remove());
+
+  // 停止雨滴动画、移除监听与画布
+  if (window.__rainRAF) {
+    cancelAnimationFrame(window.__rainRAF);
+    window.__rainRAF = null;
+  }
+  if (window.__rainResize) {
+    window.removeEventListener("resize", window.__rainResize);
+    window.__rainResize = null;
+  }
+  if (document.getElementById("rainCanvas")) {
+    window.__rainStop = true;
+    document.getElementById("rainCanvas").remove();
   }
 }
 
