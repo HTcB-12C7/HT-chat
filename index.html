@@ -1203,20 +1203,6 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
   });
 });
 
-/* ---------------- 清除特效 ---------------- */
-function removeVipEffect() {
-  ["vipStyle", "superStyle", "beachCSS"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-  });
-  document.querySelectorAll(".supergod-title,.bubble,.money-pop").forEach(e => e.remove());
-  if (window.superGodObserver) {
-    window.superGodObserver.disconnect();
-    window.superGodObserver = null;
-  }
-  console.log("🧹 已清除当前特效");
-}
-
 /* ---------------- 应用特效 ---------------- */
 function applyVipEffect(level) {
   switch (level) {
@@ -1377,6 +1363,19 @@ function applyVipEffect(level) {
       break;
     }
   }
+}
+	/* ---------------- 清除特效 ---------------- */
+function removeVipEffect() {
+  ["vipStyle", "superStyle", "beachCSS"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  document.querySelectorAll(".supergod-title,.bubble,.money-pop").forEach(e => e.remove());
+  if (window.superGodObserver) {
+    window.superGodObserver.disconnect();
+    window.superGodObserver = null;
+  }
+  console.log("🧹 已清除当前特效");
 }
 </script>
 
