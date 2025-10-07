@@ -933,8 +933,9 @@ function applyVipEffect(level) {
       break;
     }
 // 🔥 黑铁超级VIP：我的消息气泡威压震动 + 红橙光晕
-// 🔥 黑铁超级VIP：我的消息气泡威压震动 + 红橙光晕
-    case "super":
+    case "super": {
+      const style = document.createElement("style");
+      style.id = "superStyle";
       style.textContent = `
         .message.me {
           font-weight: bold;
@@ -961,7 +962,9 @@ function applyVipEffect(level) {
           75% { transform: translate(-1px,2px); }
         }
       `;
+      document.head.appendChild(style);
       break;
+    }
 
     case "supergod": {
       // 样式尽量轻：只做 transform/opacity 动画 + will-change，避免阴影动画
