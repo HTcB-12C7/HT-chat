@@ -1180,6 +1180,205 @@ function removeVipEffect() {
   text-align: center;
 }
 </style>
+<script>
+/* ================== 黑铁 VIP 特效管理 ================== */
+
+window.activeEffect = null;
+
+// 点击按钮触发
+document.querySelectorAll(".vip-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const level = btn.dataset.level;
+
+    if (window.activeEffect === level) {
+      removeVipEffect();
+      window.activeEffect = null;
+      alert("🌀 已关闭特效。");
+    } else {
+      removeVipEffect();
+      applyVipEffect(level);
+      window.activeEffect = level;
+      alert("✨ 特效已开启！");
+    }
+  });
+});
+
+/* ---------------- 清除特效 ---------------- */
+function removeVipEffect() {
+  ["vipStyle", "superStyle", "beachCSS"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  document.querySelectorAll(".supergod-title,.bubble,.money-pop").forEach(e => e.remove());
+  if (window.superGodObserver) {
+    window.superGodObserver.disconnect();
+    window.superGodObserver = null;
+  }
+  console.log("🧹 已清除当前特效");
+}
+
+/* ---------------- 应用特效 ---------------- */
+function applyVipEffect(level) {
+  switch (level) {
+    /* 🍫 黑铁VIP */
+    case "vip": {
+      const style = document.createElement("style");
+      style.id = "vipStyle";
+      style.textContent = `
+        .message.me {
+          background: linear-gradient(270deg, saddlebrown, black, orange, saddlebrown);
+          background-size: 600% 600%;
+          color: transparent;
+          -webkit-background-clip: text;
+          background-clip: text;
+          animation: vipMove 4s linear infinite;
+          border: 2px solid transparent;
+          border-image: linear-gradient(45deg, saddlebrown, black, orange) 1;
+          text-shadow: 0 0 10px rgba(139,69,19,0.6),
+                       0 0 20px rgba(255,140,0,0.6);
+        }
+        @keyframes vipMove {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
+        }`;
+      document.head.appendChild(style);
+      break;
+    }
+
+    /* 🔥 超级VIP */
+    case "super": {
+      const style = document.createElement("style");
+      style.id = "superStyle";
+      style.textContent = `
+        .message.me {
+          font-weight: bold;
+          color: #ff3c00;
+          text-shadow: 0 0 10px #ff3c00,
+                       0 0 20px #ff6a00,
+                       0 0 40px #ff0000,
+                       0 0 80px #ff0000;
+          animation: superPulse 1.2s infinite alternate ease-in-out,
+                     superShake 0.12s infinite linear;
+        }
+        @keyframes superPulse {
+          0% { transform: scale(1); color: #ff3c00; }
+          50% { transform: scale(1.2); color: #ff0000;
+                text-shadow: 0 0 20px #ff0000,
+                             0 0 40px #ff6600,
+                             0 0 80px #ff0000; }
+          100% { transform: scale(1.1); color: #ffa500; }
+        }
+        @keyframes superShake {
+          0%,100% { transform: translate(0,0); }
+          25% { transform: translate(-1px,1px); }
+          50% { transform: translate(2px,-1px); }
+          75% { transform: translate(-1px,2px); }
+        }`;
+      document.head.appendChild(style);
+      break;
+    }
+
+    /* 🏖️ 超级无敌VIP */
+    case "supergod": {
+      const box = document.getElementById("chat-box");
+      if (!box) return;
+      const css = document.createElement("style");
+      css.id = "beachCSS";
+      css.textContent = `
+        :root{
+          --sky:#8fd3ff;
+          --sea:#2aa6ff;
+          --sea-deep:#0b5fc3;
+          --sand:#f5d49d;
+          --foam:#ffffffcc;
+        }
+        #chat-box{
+          position:relative;
+          overflow:hidden;
+          background:linear-gradient(to bottom,
+            var(--sky) 0%,#bfe7ff 25%,var(--sea) 45%,var(--sea-deep) 65%,var(--sand) 100%);
+          border:3px solid transparent;
+          border-radius:14px;
+          box-shadow:0 0 40px rgba(255,215,106,.6) inset,0 0 30px rgba(0,0,0,.4);
+          animation:glowBorder 3s ease-in-out infinite;
+        }
+        @keyframes glowBorder{
+          0%,100%{box-shadow:0 0 25px rgba(255,215,106,.4) inset,0 0 10px rgba(255,255,255,.2);}
+          50%{box-shadow:0 0 55px rgba(255,255,200,.6) inset,0 0 25px rgba(255,215,106,.8);}
+        }
+        .supergod-title{
+          position:absolute;top:10px;left:50%;
+          transform:translateX(-50%);
+          font-size:28px;font-weight:900;
+          letter-spacing:2px;
+          background:linear-gradient(90deg,#fff8b0,#ffd76a,#ffb800);
+          background-size:200% 100%;
+          -webkit-background-clip:text;
+          -webkit-text-fill-color:transparent;
+          text-shadow:0 0 20px rgba(255,215,100,.9),0 0 40px rgba(255,185,0,.6);
+          animation:titleGlow 3s linear infinite;
+          z-index:3;
+        }
+        @keyframes titleGlow{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}
+        .bubble{position:absolute;bottom:28%;width:6px;height:6px;border-radius:50%;
+          background:rgba(255,255,255,.7);animation:rise 4.2s ease-in infinite;}
+        @keyframes rise{0%{transform:translateY(0);opacity:.8;}100%{transform:translateY(-160px);opacity:0;}}
+        .money-pop{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);}
+        .coin{position:absolute;font-size:24px;animation:coinUp 1s cubic-bezier(.2,.8,.2,1) forwards;}
+        @keyframes coinUp{
+          0%{transform:translate(var(--x,0),0) scale(.6);opacity:0;}
+          20%{opacity:1;}
+          100%{transform:translate(var(--x,0),calc(-180px - var(--yRand,0px))) scale(1.3);opacity:0;}
+        }`;
+      document.head.appendChild(css);
+
+      if (!box.querySelector(".supergod-title")) {
+        const title = document.createElement("div");
+        title.className = "supergod-title";
+        title.textContent = "🏖️ 黑铁超级无敌VIP";
+        box.appendChild(title);
+      }
+
+      for (let i = 0; i < 10; i++) {
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.style.left = Math.random() * 90 + "%";
+        b.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
+        box.appendChild(b);
+      }
+
+      function beachMoneyFX() {
+        const burst = document.createElement("div");
+        burst.className = "money-pop";
+        box.appendChild(burst);
+        const icons = ['🪙','💰','💵','💸','💎'];
+        for (let i = 0; i < 20; i++) {
+          const span = document.createElement("span");
+          span.className = "coin";
+          span.textContent = icons[Math.floor(Math.random()*icons.length)];
+          span.style.setProperty("--x",(Math.random()*240-120)+"px");
+          span.style.setProperty("--yRand",(Math.random()*100|0)+"px");
+          span.style.left = (Math.random()*80+10)+"%";
+          burst.appendChild(span);
+        }
+        setTimeout(()=>burst.remove(),1200);
+      }
+
+      if (window.superGodObserver) window.superGodObserver.disconnect();
+      window.superGodObserver = new MutationObserver(muts=>{
+        for(const m of muts){
+          if(m.type==="childList" && m.addedNodes.length){
+            const last=[...box.querySelectorAll(".message")].pop();
+            if(last && last.classList.contains("me")) beachMoneyFX();
+          }
+        }
+      });
+      window.superGodObserver.observe(box,{childList:true});
+      break;
+    }
+  }
+}
+</script>
 
         </body>
         </html>
