@@ -232,7 +232,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 <div id="chat-container" style="display:flex; width:100%; margin:auto; gap:10px;">
   <!-- ✅ 左侧在线用户列表 -->
   <div id="online-users" style="
-      width:18%;
+      width:15%;
       background:#222;
       color:gold;
       border-radius:8px;
@@ -260,7 +260,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 
 <!-- ✅ 右侧 VIP 特权按钮区 -->
 <div id="vip-panel" style="
-    width:12%;
+    width:17%;
     background:#1a1a1a;
     color:#ffcc66;
     border-radius:10px;
@@ -498,7 +498,7 @@ async function registerOnlineUser(user, nickname, isGuest = false) {
   // 页面关闭或刷新时删除在线状态
   window.addEventListener("beforeunload", () => remove(userRef));
 
-  // 每 30 秒刷新心跳
+  // 每 7 秒刷新心跳
   setInterval(() => {
     set(userRef, {
       nickname,
@@ -506,7 +506,7 @@ async function registerOnlineUser(user, nickname, isGuest = false) {
       realname: isGuest ? "" : document.getElementById("userPayName")?.value || "",
       lastActive: Date.now()
     });
-  }, 30000);
+  }, 7000);
 
   return id;
 }
@@ -598,7 +598,7 @@ newMsgTip.addEventListener('click', () => {
 });
 chatBox.appendChild(newMsgTip);
 
-function isNearBottom(el, threshold = 40) {
+function isNearBottom(el, threshold = 27) {
   // 距底部 <= threshold px 认为“在底部”
   return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
 }
@@ -690,7 +690,7 @@ const onlineList = document.getElementById("onlineList");
 onValue(onlineUsersRef, (snapshot) => {
   onlineList.innerHTML = ""; 
   const now = Date.now();
-  const ACTIVE_TIMEOUT = 72000; // 超过 72 秒未活跃视为离线
+  const ACTIVE_TIMEOUT = 440000; // 超过 7分20秒 未活跃视为离线
 
   if (snapshot.exists()) {
     const users = snapshot.val();
