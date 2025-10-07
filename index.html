@@ -1042,33 +1042,6 @@ function applyVipEffect(level) {
         box.appendChild(b);
       }
 
-      // 撒钱动画（限流防抖：≥700ms 才触发一次）
-      let lastBurstAt = 0;
-      function beachMoneyFX(){
-        const now = performance.now();
-        if (now - lastBurstAt < 700) return;
-        lastBurstAt = now;
-
-        const burst = document.createElement("div");
-        burst.className = "money-pop";
-        box.appendChild(burst);
-
-        const icons = ['🪙','💰','💵','💸','🤑'];
-        const count = 10; // 控制数量，防止爆显存/CPU
-        for (let i = 0; i < count; i++) {
-          const span = document.createElement("span");
-          span.className = "coin";
-          span.textContent = icons[Math.floor(Math.random()*icons.length)];
-          span.style.setProperty("--x", (Math.random()*220-110) + "px");
-          span.style.setProperty("--yRand", (Math.random()*80|0) + "px");
-          span.style.left = (Math.random()*80 + 10) + "%";
-          span.style.fontSize = (18 + Math.random()*10) + "px";
-          span.style.animationDelay = (Math.random()*120|0) + "ms";
-          burst.appendChild(span);
-        }
-        setTimeout(() => burst.remove(), 1100);
-      }
-
       // 只观察新增的“我”的气泡，且只观察一层，避免多次触发
       window.__superGodObserver = new MutationObserver(muts => {
         for (const m of muts) {
