@@ -269,9 +269,20 @@ document.addEventListener('touchstart', enableBgm, { once: true });
 ">	
                     <div class="container">
 
-<h2>HT 逝世聊天 —— FIREBASE后端 US中部服务器 支持<a href="https://raw.githubusercontent.com/HTcB-12C7/HT-chat/refs/heads/main/index.html" download="黑铁逝世聊天本地版.html">
-下载不会被呕桑封的本地版
-</a>
+<h2>HT 逝世聊天 —— FIREBASE后端 US中部服务器 支持
+<a id="downloadLink" href="#">下载不会被呕桑封的本地版</a>
+
+<script>
+document.getElementById('downloadLink').addEventListener('click', function() {
+  const url = "https://raw.githubusercontent.com/HTcB-12C7/HT-chat/refs/heads/main/index.html";
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '黑铁逝世聊天本地版.html';  // 指定保存的文件名
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
+</script>
 
 </h2>
 
