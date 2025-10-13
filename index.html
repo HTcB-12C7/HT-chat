@@ -1344,6 +1344,7 @@ const auth = getAuth();
 const db = getDatabase();
 
 window.addEventListener("load", () => {
+	 setTimeout(() => {   // 延迟1秒执行
   const broadcastInput = document.getElementById("broadcastMsg");
   const sendBtn = broadcastInput?.nextElementSibling; // 紧挨着的按钮
 
@@ -1397,6 +1398,7 @@ window.addEventListener("load", () => {
       console.error("❌ 获取 VIP 信息失败：", err);
     }
   });
+  }, 1000); // ⏳ 延迟 1 秒再检测登录状态
 });
 </script>
         </body>
