@@ -724,6 +724,10 @@ if (msgData.uid !== currentUserId && msgData.effect) {
   // 别人发送消息时携带 effect 信息，播放他特效
   applyVipEffect(msgData.effect);
 }
+if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
+  showBroadcast(msgData.text);
+  return; // 不把广播加进普通聊天框
+}
 
 });
 // ✅ 监听在线用户变化
@@ -748,8 +752,8 @@ onValue(onlineUsersRef, (snapshot) => {
       const nickname = u.nickname || "(匿名)";
       const email = u.email || "🟡";
       const realname = u.realname || "";
-// ✅ 当前用户显示🟢，其他用户（包括游客）🟢
-let dot = "🟢";
+// ✅ 当前用户显示🟢，其他用户（包括游客）🟡
+let dot = "🟡";
 if (uid === currentUserId) {
   dot = "🟢";
 }
@@ -1226,6 +1230,77 @@ function removeVipEffect() {
   text-align: center;
 }
 </style>
+<!-- ✅ 全服广播显示模块（独立版） -->
+<style>
+#broadcastOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: none;              /* 默认隐藏 */
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  flex-direction: column;
+  text-align: center;
+  color: gold;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+#broadcastOverlay .msg {
+  font-size: 5vw;
+  font-weight: bold;
+  text-shadow: 0 0 30px rgba(255,200,0,0.9), 0 0 60px rgba(255,150,0,0.8);
+  margin-bottom: 60px;
+  white-space: pre-wrap;
+  max-width: 90%;
+  animation: broadcastGlow 2s ease-in-out infinite alternate;
+}
+
+#broadcastOverlay button {
+  padding: 16px 48px;
+  font-size: 24px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #ffae00, #ff6600);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(255,140,0,0.8);
+  transition: transform 0.2s;
+}
+#broadcastOverlay button:hover {
+  transform: scale(1.1);
+}
+
+@keyframes broadcastGlow {
+  0% { text-shadow: 0 0 20px #ffef9c, 0 0 40px #ffa500; color: gold; }
+  100% { text-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00; color: #fff6cc; }
+}
+</style>
+
+<div id="broadcastOverlay">
+  <div class="msg" id="broadcastContent">【全服广播】示例文字</div>
+  <button onclick="closeBroadcast()">确认</button>
+</div>
+
+<script>
+// ✅ 显示全服广播
+function showBroadcast(text) {
+  const overlay = document.getElementById("broadcastOverlay");
+  const msgBox = document.getElementById("broadcastContent");
+  msgBox.textContent = text;
+  overlay.style.display = "flex";
+}
+
+// ✅ 用户点击后关闭
+function closeBroadcast() {
+  document.getElementById("broadcastOverlay").style.display = "none";
+}
+
+// ✅ 示例：接收到广播后调用
+// showBroadcast("🔥全服维护将于今晚10点开始，请玩家提前保存进度！");
+</script>
+
 <!-- ✅ 限制“全服广播”仅员工可输入 -->
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
