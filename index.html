@@ -1226,6 +1226,69 @@ function removeVipEffect() {
   text-align: center;
 }
 </style>
+<!-- ✅ 限制“全服广播”仅员工可输入 -->
+<script type="module">
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+const auth = getAuth();
+const db = getDatabase();
+
+window.addEventListener("load", () => {
+  const broadcastInput = document.getElementById("broadcastMsg");
+  const sendBtn = broadcastInput?.nextElementSibling; // 紧挨着的按钮
+
+  if (!broadcastInput || !sendBtn) return;
+
+  // 默认禁用输入
+  broadcastInput.disabled = true;
+  broadcastInput.placeholder = "（仅限黑铁员工使用）";
+  sendBtn.disabled = true;
+  sendBtn.style.opacity = "0.4";
+  sendBtn.style.cursor = "not-allowed";
+
+  // 登录状态变化监听
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      // 未登录时保持禁用
+      return;
+    }
+
+    try {
+      const userRef = ref(db, "users/" + user.uid);
+      const snap = await get(userRef);
+
+      if (snap.exists()) {
+        const data = snap.val();
+        const vipLevel = data.vipLevel || "none";
+
+        // ✅ 只有员工才允许输入广播
+        if (vipLevel === "staff") {
+          broadcastInput.disabled = false;
+          broadcastInput.placeholder = "输入广播内容...";
+          sendBtn.disabled = false;
+          sendBtn.style.opacity = "1";
+          sendBtn.style.cursor = "pointer";
+          console.log("✅ 员工权限已启用广播输入");
+        } else {
+          // 非员工用户保持禁用
+          broadcastInput.disabled = true;
+          broadcastInput.placeholder = "（仅限黑铁员工使用）";
+          sendBtn.disabled = true;
+          sendBtn.style.opacity = "0.4";
+          sendBtn.style.cursor = "not-allowed";
+
+          // 防止直接调用 sendBroadcast()
+          window.sendBroadcast = function() {
+            alert("⚠️ 只有黑铁员工可以发送全服广播！");
+          };
+        }
+      }
+    } catch (err) {
+      console.error("❌ 获取 VIP 信息失败：", err);
+    }
+  });
+});
+</script>
         </body>
         </html>
