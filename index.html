@@ -361,6 +361,20 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     启动/回车
   </button>
 </div>
+<!-- ✅ 仅黑铁员工能使用的全服广播发送区 -->
+<div id="broadcastArea" style="
+  margin-top: 10px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+">
+  <input type="text" id="broadcastMsg" placeholder="（仅限黑铁员工使用）"
+    style="flex:8; padding:10px; border-radius:5px; border:1px solid #aaa; background:#333; color:#ccc;">
+  <button onclick="sendBroadcast()" 
+    style="flex:2; border:none; border-radius:5px; background:#444; color:#999; font-weight:bold; cursor:not-allowed;">
+    📢 全服广播
+  </button>
+</div>
 								
 <!-- ✅ 使用须知 -->
 <div id="chat-rules" style="
@@ -1300,7 +1314,27 @@ function closeBroadcast() {
 // ✅ 示例：接收到广播后调用
 // showBroadcast("🔥全服维护将于今晚10点开始，请玩家提前保存进度！");
 </script>
+<script>
+async function sendBroadcast() {
+  const input = document.getElementById("broadcastMsg");
+  const text = input.value.trim();
+  if (!text) return alert("请输入广播内容！");
 
+  // 发送全服广播消息（存入 Firebase）
+  await push(messagesRef, {
+    uid: "SYSTEM_BROADCAST",
+    user: "【系统广播】",
+    text,
+    time: Date.now(),
+    avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
+    vipLevel: "staff",
+    effect: "broadcast"
+  });
+
+  alert("✅ 全服广播已发送！");
+  input.value = "";
+}
+</script>
 <!-- ✅ 限制“全服广播”仅员工可输入 -->
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
