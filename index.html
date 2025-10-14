@@ -1380,60 +1380,6 @@ window.sendBroadcast = async function () {
   input.value = "";
 };
 </script>
-<script>
-// ✅ 显示全服广播
-function showBroadcast(text) {
-  const overlay = document.getElementById("broadcastOverlay");
-  const msgBox = document.getElementById("broadcastContent");
-  msgBox.textContent = text;
-  overlay.style.display = "flex";
-}
-
-// ✅ 用户点击后关闭
-function closeBroadcast() {
-  document.getElementById("broadcastOverlay").style.display = "none";
-}
-
-// ✅ 示例：接收到广播后调用
-// showBroadcast("🔥全服维护将于今晚10点开始，请玩家提前保存进度！");
-</script>
-<!-- ✅ 全服广播发送逻辑 -->
-<script type="module">
-import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-const db = getDatabase();
-
-// 让按钮 onclick="sendBroadcast()" 能访问
-window.sendBroadcast = async function () {
-  const input = document.getElementById("broadcastMsg");
-  const text = input.value.trim();
-  if (!text) return alert("请输入广播内容！");
-
-  try {
-    await push(ref(db, "messages"), {
-      uid: "SYSTEM_BROADCAST",
-      user: "【系统广播】",
-      text,
-      time: Date.now(),
-      avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
-      vipLevel: "staff",
-      effect: "broadcast"
-    });
-
-    alert("✅ 全服广播已发送！");
-    input.value = "";
-  } catch (err) {
-    console.error("❌ 广播发送失败：", err);
-    alert("广播发送失败：" + err.message);
-  }
-	// ✅ 回车发送
-msgInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    push();
-  }
-});
-};
-</script>
 
 <!-- ✅ 限制“全服广播”仅员工可输入 -->
 <script type="module">
