@@ -1298,6 +1298,143 @@ function removeVipEffect() {
 </div>
 
 <script>
+	<!-- ✅ 聊天框中间广播弹窗 -->
+<style>
+#broadcastOverlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+#broadcastBox {
+  background: rgba(30, 30, 30, 0.95);
+  border: 2px solid gold;
+  border-radius: 12px;
+  padding: 25px 35px;
+  text-align: center;
+  color: gold;
+  font-weight: bold;
+  font-family: "Microsoft YaHei", sans-serif;
+  box-shadow: 0 0 20px gold;
+  animation: glowPulse 2s ease-in-out infinite alternate;
+  max-width: 80%;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 15px gold; color: #ffef9c; }
+  100% { box-shadow: 0 0 35px #ffb300; color: #fff6cc; }
+}
+
+#broadcastBox .msg {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 20px rgba(255, 200, 0, 0.8);
+  line-height: 1.5;
+}
+
+#broadcastBox button {
+  padding: 10px 30px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #ffcc00, #ff8800);
+  color: black;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 180, 0, 0.8);
+  transition: transform 0.2s;
+}
+#broadcastBox button:hover { transform: scale(1.1); }
+</style>
+
+<div id="broadcastOverlay">
+  <div id="broadcastBox">
+    <div class="msg" id="broadcastContent">【系统广播】示例内容</div>
+    <button onclick="markBroadcastRead()">已阅</button>
+  </div>
+</div>
+
+<script type="module">
+import { getDatabase, ref, push, get, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+const db = getDatabase();
+const auth = getAuth();
+const overlay = document.getElementById("broadcastOverlay");
+const content = document.getElementById("broadcastContent");
+
+let currentBroadcastId = null;
+let currentUserId = null;
+
+// ✅ 显示广播
+window.showBroadcast = function (text) {
+  content.textContent = text;
+  overlay.style.display = "flex";
+};
+
+// ✅ 用户点击“已阅”
+window.markBroadcastRead = async function () {
+  overlay.style.display = "none";
+  if (!currentBroadcastId || !currentUserId) return;
+  const userReadRef = ref(db, `users/${currentUserId}/readBroadcasts/${currentBroadcastId}`);
+  await set(userReadRef, true);
+  console.log("✅ 用户已阅广播:", currentBroadcastId);
+};
+
+// ✅ 监听最新广播 + 自动显示未读
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  currentUserId = user.uid;
+
+  // 监听 broadcasts 列表
+  const broadcastsRef = ref(db, "broadcasts");
+  onValue(broadcastsRef, async (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.val();
+    const ids = Object.keys(data);
+    const latestId = ids[ids.length - 1];
+    const latestBroadcast = data[latestId];
+    currentBroadcastId = latestId;
+
+    // 检查用户是否已读
+    const readRef = ref(db, `users/${user.uid}/readBroadcasts/${latestId}`);
+    const readSnap = await get(readRef);
+    if (!readSnap.exists()) {
+      showBroadcast(latestBroadcast.text);
+    }
+  });
+});
+
+// ✅ 发送广播函数（管理员专用）
+window.sendBroadcast = async function () {
+  const input = document.getElementById("broadcastMsg");
+  const text = input.value.trim();
+  if (!text) return alert("请输入广播内容！");
+
+  await push(ref(db, "broadcasts"), {
+    text,
+    time: Date.now(),
+  });
+
+  // 同时发到普通 messages，用于旧版客户端兼容
+  await push(ref(db, "messages"), {
+    uid: "SYSTEM_BROADCAST",
+    user: "【系统广播】",
+    text,
+    time: Date.now(),
+    avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
+    vipLevel: "staff",
+    effect: "broadcast",
+  });
+
+  alert("✅ 全服广播已发送！");
+  input.value = "";
+};
+</script>
+
 // ✅ 显示全服广播
 function showBroadcast(text) {
   const overlay = document.getElementById("broadcastOverlay");
@@ -1342,6 +1479,13 @@ window.sendBroadcast = async function () {
     console.error("❌ 广播发送失败：", err);
     alert("广播发送失败：" + err.message);
   }
+	// ✅ 回车发送
+msgInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    push();
+  }
+});
 };
 </script>
 
