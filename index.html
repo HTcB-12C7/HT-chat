@@ -1400,6 +1400,26 @@ window.addEventListener("load", () => {
   });
   }, 1000); // ⏳ 延迟 1 秒再检测登录状态
 });
+	// ✅ 全服广播发送函数
+window.sendBroadcast = async function() {
+  const input = document.getElementById("broadcastMsg");
+  const text = input.value.trim();
+  if (!text) return alert("请输入广播内容！");
+
+  // 发送全服广播消息（存入 Firebase）
+  await push(messagesRef, {
+    uid: "SYSTEM_BROADCAST",
+    user: "【系统广播】",
+    text,
+    time: Date.now(),
+    avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
+    vipLevel: "staff",
+    effect: "broadcast"
+  });
+
+  alert("✅ 全服广播已发送！");
+  input.value = "";
+};
 </script>
         </body>
         </html>
