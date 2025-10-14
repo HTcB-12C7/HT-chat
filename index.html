@@ -1244,60 +1244,6 @@ function removeVipEffect() {
   text-align: center;
 }
 </style>
-<!-- ✅ 全服广播显示模块（独立版） -->
-<style>
-#broadcastOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.92);
-  display: none;              /* 默认隐藏 */
-  align-items: center;
-  justify-content: center;
-  z-index: 999999;
-  flex-direction: column;
-  text-align: center;
-  color: gold;
-  font-family: "Microsoft YaHei", sans-serif;
-}
-
-#broadcastOverlay .msg {
-  font-size: 5vw;
-  font-weight: bold;
-  text-shadow: 0 0 30px rgba(255,200,0,0.9), 0 0 60px rgba(255,150,0,0.8);
-  margin-bottom: 60px;
-  white-space: pre-wrap;
-  max-width: 90%;
-  animation: broadcastGlow 2s ease-in-out infinite alternate;
-}
-
-#broadcastOverlay button {
-  padding: 16px 48px;
-  font-size: 24px;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(45deg, #ffae00, #ff6600);
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 0 20px rgba(255,140,0,0.8);
-  transition: transform 0.2s;
-}
-#broadcastOverlay button:hover {
-  transform: scale(1.1);
-}
-
-@keyframes broadcastGlow {
-  0% { text-shadow: 0 0 20px #ffef9c, 0 0 40px #ffa500; color: gold; }
-  100% { text-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00; color: #fff6cc; }
-}
-</style>
-
-<div id="broadcastOverlay">
-  <div class="msg" id="broadcastContent">【全服广播】示例文字</div>
-  <button onclick="closeBroadcast()">确认</button>
-</div>
-
-<script>
 	<!-- ✅ 聊天框中间广播弹窗 -->
 <style>
 #broadcastOverlay {
