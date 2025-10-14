@@ -904,6 +904,26 @@ document.getElementById("saveBtn").onclick = async () => {
   document.getElementById("userPhoto").src = avatarURL;
   alert("信息已保存！");
 };
+	// ✅ 全服广播发送函数
+window.sendBroadcast = async function() {
+  const input = document.getElementById("broadcastMsg");
+  const text = input.value.trim();
+  if (!text) return alert("请输入广播内容！");
+
+  // 发送全服广播消息（存入 Firebase）
+  await push(messagesRef, {
+    uid: "SYSTEM_BROADCAST",
+    user: "【系统广播】",
+    text,
+    time: Date.now(),
+    avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
+    vipLevel: "staff",
+    effect: "broadcast"
+  });
+
+  alert("✅ 全服广播已发送！");
+  input.value = "";
+};
 </script>
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -1313,27 +1333,6 @@ function closeBroadcast() {
 
 // ✅ 示例：接收到广播后调用
 // showBroadcast("🔥全服维护将于今晚10点开始，请玩家提前保存进度！");
-</script>
-<script>
-async function sendBroadcast() {
-  const input = document.getElementById("broadcastMsg");
-  const text = input.value.trim();
-  if (!text) return alert("请输入广播内容！");
-
-  // 发送全服广播消息（存入 Firebase）
-  await push(messagesRef, {
-    uid: "SYSTEM_BROADCAST",
-    user: "【系统广播】",
-    text,
-    time: Date.now(),
-    avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
-    vipLevel: "staff",
-    effect: "broadcast"
-  });
-
-  alert("✅ 全服广播已发送！");
-  input.value = "";
-}
 </script>
 <!-- ✅ 限制“全服广播”仅员工可输入 -->
 <script type="module">
