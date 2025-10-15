@@ -362,6 +362,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   </button>
 </div>
 <!-- ✅ 仅黑铁员工能使用的全服广播发送区 -->
+<!-- ✅ 仅黑铁员工能使用的全服广播发送区 -->
 <div id="broadcastArea" style="
   margin-top: 10px;
   display: flex;
@@ -369,9 +370,9 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   align-items: center;
 ">
   <input type="text" id="broadcastMsg" placeholder="（仅限黑铁员工使用）"
-    style="flex:8; padding:10px; border-radius:5px; border:1px solid #aaa; background:#333; color:#ccc;">
+    style="flex:8; padding:10px; border-radius:5px; border:1px solid #aaa; background:orange; color:black;">
   <button onclick="sendBroadcast()" 
-    style="flex:2; border:none; border-radius:5px; background:#444; color:#999; font-weight:bold; cursor:not-allowed;">
+    style="flex:2; border:none; border-radius:5px; background:red; color:white; font-weight:bold; cursor:not-allowed;">
     📢 全服广播
   </button>
 </div>
@@ -1458,8 +1459,9 @@ import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/
 const auth = getAuth();
 const db = getDatabase();
 
+// ✅ 限制"全服广播"仅员工可输入
 window.addEventListener("load", () => {
-	 setTimeout(() => {   // 延迟1秒执行
+   setTimeout(() => {   // 延迟1秒执行
   const broadcastInput = document.getElementById("broadcastMsg");
   const sendBtn = broadcastInput?.nextElementSibling; // 紧挨着的按钮
 
@@ -1468,9 +1470,13 @@ window.addEventListener("load", () => {
   // 默认禁用输入
   broadcastInput.disabled = true;
   broadcastInput.placeholder = "（仅限黑铁员工使用）";
+  broadcastInput.style.background = "#333";
+  broadcastInput.style.color = "#ccc";
   sendBtn.disabled = true;
   sendBtn.style.opacity = "0.4";
   sendBtn.style.cursor = "not-allowed";
+  sendBtn.style.background = "#444";
+  sendBtn.style.color = "#999";
 
   // 登录状态变化监听
   onAuthStateChanged(auth, async (user) => {
@@ -1491,17 +1497,25 @@ window.addEventListener("load", () => {
         if (vipLevel === "staff") {
           broadcastInput.disabled = false;
           broadcastInput.placeholder = "输入广播内容...";
+          broadcastInput.style.background = "orange";
+          broadcastInput.style.color = "black";
           sendBtn.disabled = false;
           sendBtn.style.opacity = "1";
           sendBtn.style.cursor = "pointer";
+          sendBtn.style.background = "red";
+          sendBtn.style.color = "white";
           console.log("✅ 员工权限已启用广播输入");
         } else {
           // 非员工用户保持禁用
           broadcastInput.disabled = true;
           broadcastInput.placeholder = "（仅限黑铁员工使用）";
+          broadcastInput.style.background = "#333";
+          broadcastInput.style.color = "#ccc";
           sendBtn.disabled = true;
           sendBtn.style.opacity = "0.4";
           sendBtn.style.cursor = "not-allowed";
+          sendBtn.style.background = "#444";
+          sendBtn.style.color = "#999";
 
           // 防止直接调用 sendBroadcast()
           window.sendBroadcast = function() {
