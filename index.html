@@ -1428,6 +1428,26 @@ window.sendBroadcast = async function () {
   alert("✅ 全服广播已发送！");
   input.value = "";
 };
+	// ✅ 全服广播回车发送功能
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    const broadcastInput = document.getElementById("broadcastMsg");
+    
+    if (broadcastInput) {
+      broadcastInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          // 检查是否有员工权限
+          if (!broadcastInput.disabled) {
+            sendBroadcast();
+          } else {
+            alert("⚠️ 只有黑铁员工可以发送全服广播！");
+          }
+        }
+      });
+    }
+  }, 1500); // 延迟1.5秒确保元素加载完成
+});
 </script>
 
 <!-- ✅ 限制“全服广播”仅员工可输入 -->
