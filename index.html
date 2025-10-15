@@ -767,7 +767,7 @@ onValue(onlineUsersRef, (snapshot) => {
       const email = u.email || "🟡";
       const realname = u.realname || "";
 // ✅ 当前用户显示🟢，其他用户（包括游客）🟡
-let dot = "🟡";
+let dot = "🟢";
 if (uid === currentUserId) {
   dot = "🟢";
 }
@@ -793,7 +793,56 @@ function sanitize(str) {
     "'": '&#39;'
   }[s]));
 }
+// ✅ 自动清理消息 - 超过270条删除前200条
+async function autoCleanMessages() {
+  try {
+    const messagesRef = ref(db, "messages");
+    const snapshot = await get(messagesRef);
+    
+    if (snapshot.exists()) {
+      const messages = snapshot.val();
+      const messageCount = Object.keys(messages).length;
+      
+      console.log(`📊 当前消息数量: ${messageCount}`);
+      
+      // 超过270条时清理前200条
+      if (messageCount > 270) {
+        console.log("🧹 开始清理消息...");
+        
+        const messageEntries = Object.entries(messages);
+        const messagesToDelete = messageEntries.slice(0, 200); // 前200条
+        
+        // 批量删除
+        const deletePromises = messagesToDelete.map(([key]) => 
+          remove(ref(db, `messages/${key}`))
+        );
+        
+        await Promise.all(deletePromises);
+        console.log(`✅ 已清理 ${messagesToDelete.length} 条旧消息`);
+        
+        // 显示系统提示
+        await push(messagesRef, {
+          uid: "SYSTEM",
+          user: "【系统清理】",
+          text: `已自动清理 ${messagesToDelete.length} 条旧消息，当前保留 ${messageCount - messagesToDelete.length} 条`,
+          time: Date.now(),
+          avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
+          vipLevel: "staff"
+        });
+      }
+    }
+  } catch (error) {
+    console.error("❌ 自动清理失败:", error);
+  }
+}
 
+// ✅ 定期检查清理（每5分钟检查一次）
+setInterval(autoCleanMessages, 5 * 60 * 1000);
+
+// ✅ 页面加载时立即检查一次
+window.addEventListener('load', () => {
+  setTimeout(autoCleanMessages, 3000); // 延迟3秒执行，确保其他初始化完成
+});
 // --- 发送消息 ---
 // ✅ 全面修复版：超级无敌VIP 开启后仍可发消息
 window.sendMsg = async function () {
