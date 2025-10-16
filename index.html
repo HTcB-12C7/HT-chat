@@ -981,11 +981,12 @@ onAuthStateChanged(authCheck, async (user) => {
     try {
       const userRef = ref(dbCheck, "users/" + user.uid);
       const snap = await get(userRef);
-      if (snap.exists()) {
-        const data = snap.val();
-        userVipLevel = data.vipLevel || "none";
-        console.log("✅ 当前VIP等级：", userVipLevel);
-      } else {
+if (snap.exists()) {
+  const data = snap.val();
+  window.userVipLevel = data.vipLevel || "none";  // ← 加 window.
+  console.log("✅ 当前VIP等级：", window.userVipLevel);
+}
+ else {
         console.log("⚠️ 用户数据未找到，默认为 none");
       }
     } catch (err) {
