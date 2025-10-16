@@ -361,7 +361,7 @@ document.addEventListener('touchstart', enableBgm, { once: true });
     启动/回车
   </button>
 </div>
-<!-- ✅ 仅黑铁员工能使用的全服广播发送区 -->
+						
 <!-- ✅ 仅黑铁员工能使用的全服广播发送区 -->
 <div id="broadcastArea" style="
   margin-top: 10px;
@@ -557,7 +557,7 @@ async function registerOnlineUser(user, nickname, isGuest = false) {
   // 页面关闭或刷新时删除在线状态
   window.addEventListener("beforeunload", () => remove(userRef));
 
-  // 每 7 秒刷新心跳
+  // 每 2 秒刷新心跳
   setInterval(() => {
     set(userRef, {
       nickname,
@@ -565,7 +565,7 @@ async function registerOnlineUser(user, nickname, isGuest = false) {
       realname: isGuest ? "" : document.getElementById("userPayName")?.value || "",
       lastActive: Date.now()
     });
-  }, 7000);
+  }, 2000);
 
   return id;
 }
@@ -834,8 +834,8 @@ async function autoCleanMessages() {
         // 显示系统提示
         await push(messagesRef, {
           uid: "SYSTEM",
-          user: "【黑铁上服清洁工】",
-          text: `已自动清理 ${messagesToDelete.length} 条旧消息，当前保留 ${messageCount - messagesToDelete.length} 条`,
+          user: "【黑铁上服清洁】",
+          text: `看看你们又又又干了神马？“270+”！本牛马已清理 ${messagesToDelete.length} 条旧消息，当前保留 ${messageCount - messagesToDelete.length} 条`,
           time: Date.now(),
           avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
           vipLevel: "staff"
