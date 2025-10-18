@@ -678,7 +678,10 @@ onChildAdded(messagesRef, (snapshot) => {
   const isMe = msgData.uid === currentUserId;
   const msgClass = isMe ? "me" : "other";
   const avatar = msgData.avatar || "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
-
+  // ✅ 新增：检查对方消息是否有特效，有就显示特效
+  if (!isMe && msgData.effect && msgData.effect !== "none") {
+    applyVipEffect(msgData.effect);
+  }
 const level = msgData.vipLevel || "none";
 let levelTag = "";
 
