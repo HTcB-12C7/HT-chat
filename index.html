@@ -1605,6 +1605,197 @@ window.addEventListener("load", () => {
       console.error("❌ 获取 VIP 信息失败：", err);
     }
   });
+	   // --- 登录状态变化监听 ---
+onAuthStateChanged(auth, async (user) => {
+  const loginForm = document.getElementById("loginForm");
+  const userInfo = document.getElementById("userInfo");
+  const defaultAvatar = "https://htcb-12c7.github.io/htgov/assets/login-placeholder.svg";
+
+  if (user) {
+    // ✅ 登录成功
+    loginForm.style.display = "none";
+    userInfo.style.display = "block";
+
+    currentUserId = user.uid;
+    const userRef = ref(db, "users/" + user.uid);
+    const snap = await get(userRef);
+
+    if (snap.exists()) {
+      const data = snap.val();
+      username = data.nickname || user.email;
+      document.getElementById("userNickname").value = data.nickname || "";
+      document.getElementById("userEmail").value = data.email || user.email || "";
+      document.getElementById("userPayMethod").value = data.payMethod || "";
+      document.getElementById("userPayName").value = data.payName || "";
+      document.getElementById("userPayAccount").value = data.payAccount || "";
+      document.getElementById("userPhoto").src = data.avatar || user.photoURL || defaultAvatar;
+      document.getElementById("userPhotoPreview").src = data.avatar || user.photoURL || defaultAvatar;
+    } else {
+      username = user.email || "匿名用户";
+    }
+
+    console.log("✅ 已登录为:", username);
+  } else {
+    // ⚠️ 未登录状态（游客进入）
+    loginForm.style.display = "block";
+    userInfo.style.display = "none";
+
+    // ✅ 生成设备指纹（防止同一设备设置多个昵称）
+    const deviceFingerprint = await generateDeviceFingerprint();
+    
+    // ✅ 检查该设备是否已经设置过昵称
+    const deviceUsersRef = ref(db, "deviceUsers/" + deviceFingerprint);
+    const deviceSnap = await get(deviceUsersRef);
+    
+    if (deviceSnap.exists()) {
+      // 该设备已经设置过昵称，直接使用之前的昵称
+      const deviceData = deviceSnap.val();
+      username = deviceData.nickname;
+      currentUserId = deviceData.userId;
+      
+      console.log("🔄 检测到设备已有昵称:", username);
+    } else {
+      // 🔎 拉取当前在线用户 + 已注册用户，用于昵称检测
+      const [onlineSnap, usersSnap] = await Promise.all([
+        get(onlineUsersRef),
+        get(ref(db, "users"))
+      ]);
+      const onlineUsers = onlineSnap.exists() ? onlineSnap.val() : {};
+      const registeredUsers = usersSnap.exists() ? usersSnap.val() : {};
+
+      // 🧩 输入昵称（游客）
+      let tempName = prompt("请输入你的昵称（登录后不需要输入，👈导航栏：黑铁VIP注册）")?.trim() || "游客";
+
+      // 🧩 检查是否重复（在线 or 注册）
+      const duplicateOnline = Object.values(onlineUsers).some(u => u.nickname === tempName);
+      const duplicateRegistered = Object.values(registeredUsers).some(u => u.nickname === tempName);
+
+      if (duplicateOnline || duplicateRegistered) {
+        alert("⚠️ 该昵称已被黑铁VIP强占，请更换一个昵称！");
+        location.reload(); // 强制刷新重新输入昵称
+        return;
+      }
+
+      // ✅ 昵称通过检测
+      username = tempName;
+      currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
+      
+      // ✅ 保存设备-昵称映射到数据库
+      await set(deviceUsersRef, {
+        nickname: username,
+        userId: currentUserId,
+        deviceFingerprint: deviceFingerprint,
+        firstSeen: Date.now(),
+        lastSeen: Date.now()
+      });
+      
+      console.log("🟡 新游客已加入:", username);
+    }
+
+    document.getElementById("userPhoto").src = defaultAvatar;
+  }
+
+  // ✅ 注册在线用户信息（统一处理）
+  if (currentUserId) {
+    const userRef = ref(db, "onlineUsers/" + currentUserId);
+    await set(userRef, {
+      nickname: username,
+      email: currentUserId.startsWith("guest_") ? "(游客)" : (auth.currentUser?.email || ""),
+      realname: document.getElementById("userPayName")?.value || "",
+      lastActive: Date.now(),
+      deviceLocked: currentUserId.startsWith("guest_") // 标记游客设备锁定
+    });
+    
+    // 页面关闭或刷新时删除在线状态
+    window.addEventListener("beforeunload", () => {
+      if (currentUserId) {
+        remove(ref(db, "onlineUsers/" + currentUserId));
+      }
+    });
+  }
+
+  usernameReady = true;
+});
+
+// ✅ 生成设备指纹函数
+async function generateDeviceFingerprint() {
+  const components = [];
+  
+  // 用户代理
+  components.push(navigator.userAgent);
+  
+  // 语言
+  components.push(navigator.language);
+  
+  // 时区
+  components.push(new Date().getTimezoneOffset());
+  
+  // 屏幕信息
+  components.push(screen.width + 'x' + screen.height + 'x' + screen.colorDepth);
+  
+  // 硬件并发数
+  components.push(navigator.hardwareConcurrency || 'unknown');
+  
+  // 设备内存
+  components.push(navigator.deviceMemory || 'unknown');
+  
+  // Canvas 指纹
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#f60';
+  ctx.fillRect(125, 1, 62, 20);
+  ctx.fillStyle = '#069';
+  ctx.fillText('Fingerprint', 2, 15);
+  ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+  ctx.fillText('Fingerprint', 4, 17);
+  const canvasData = canvas.toDataURL();
+  components.push(canvasData);
+  
+  // WebGL 指纹
+  const gl = canvas.getContext('webgl');
+  if (gl) {
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    if (debugInfo) {
+      components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL));
+      components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL));
+    }
+  }
+  
+  // 组合所有组件并生成哈希
+  const fingerprintString = components.join('|');
+  const encoder = new TextEncoder();
+  const data = encoder.encode(fingerprintString);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const fingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return fingerprint;
+}
+
+// ✅ 定期清理旧的设备记录（防止数据库过大）
+async function cleanupOldDeviceRecords() {
+  const deviceUsersRef = ref(db, "deviceUsers");
+  const snap = await get(deviceUsersRef);
+  
+  if (snap.exists()) {
+    const devices = snap.val();
+    const now = Date.now();
+    const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000; // 30天
+    
+    Object.entries(devices).forEach(async ([fingerprint, deviceData]) => {
+      if (now - deviceData.lastSeen > THIRTY_DAYS) {
+        // 删除30天未使用的设备记录
+        await remove(ref(db, "deviceUsers/" + fingerprint));
+        console.log("🧹 清理过期设备记录:", fingerprint);
+      }
+    });
+  }
+}
+
+// 每24小时清理一次旧设备记录
+setInterval(cleanupOldDeviceRecords, 24 * 60 * 60 * 1000);
   }, 1000); // ⏳ 延迟 1 秒再检测登录状态
 });
 </script>
