@@ -751,9 +751,12 @@ if (wasAtBottom) {
   newMsgTip.textContent = `有 ${unreadCount} 条新消息，点此查看`;
   newMsgTip.style.display = 'inline-block';
 }
-if (msgData.uid !== currentUserId && msgData.effect) {
+if (msgData.uid !== currentUserId && msgData.effect && msgData.effect !== "none") {
   // 别人发送消息时携带 effect 信息，播放他特效
   applyVipEffect(msgData.effect);
+  
+  // ✅ 特效永久显示 - 不自动清除
+  // 删除 setTimeout 清除代码
 }
 if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
   showBroadcast(msgData.text);
