@@ -707,7 +707,13 @@ else if (level === "supergod") {
   ">黑铁超级无敌VIP</span>`;
 }
 else if (level === "staff") {
-  levelTag = `<span style="color:deepskyblue;font-weight:bold;">黑铁员工</span>`;
+  levelTag = `<span style="
+    background: linear-gradient(45deg, #000000, #B8860B, #DAA520, #FFD700);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(184, 134, 11, 0.6);
+  ">黑铁员工</span>`;
 }
 	
 else if (level === "ceo") {
@@ -828,8 +834,22 @@ function sanitize(str) {
     return str; // CEO可以发送HTML
   }
   
-  // 其他用户正常过滤
-  return str.replace(/[&<>"']/g, s => ({
+  // 脏话过滤列表
+  const badWords = [
+    '我是你爸', '我是你妈', '我是你爸爸', '我是你妈妈', 
+    '傻逼', '我操', '我是你大爷', '操'
+  ];
+  
+  let filteredStr = str;
+  
+  // 过滤脏话
+  badWords.forEach(word => {
+    const regex = new RegExp(word, 'gi');
+    filteredStr = filteredStr.replace(regex, '***');
+  });
+  
+  // 其他用户正常过滤HTML字符
+  return filteredStr.replace(/[&<>"']/g, s => ({
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
@@ -837,6 +857,7 @@ function sanitize(str) {
     "'": '&#39;'
   }[s]));
 }
+
 // ✅ 自动清理消息 - 超过270条删除前200条
 async function autoCleanMessages() {
   try {
@@ -868,7 +889,7 @@ async function autoCleanMessages() {
         await push(messagesRef, {
           uid: "SYSTEM",
           user: "【黑铁上服清洁】",
-          text: `看看你们又又又干了神马？“270+”！本牛马已清理 ${messagesToDelete.length} 条旧消息，当前保留 ${messageCount - messagesToDelete.length} 条`,
+          text: `看看你们又又又干了神马？“270+”！本牛马已清理 ${messagesToDelete.length} 条你们制造的垃圾，保留最新 ${messageCount - messagesToDelete.length} 条废话`,
           time: Date.now(),
           avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
           vipLevel: "staff"
