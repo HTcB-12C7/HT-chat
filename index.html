@@ -343,8 +343,8 @@ document.addEventListener('touchstart', enableBgm, { once: true });
   <!-- 员工权限 -->
 <button class="vip-btn" data-level="staff" style="
     width:100%;margin:8px 0;padding:8px;border:none;border-radius:8px;
-    background:linear-gradient(45deg,#8B6914,#000000,#D4AF37);  <!-- 改为黑金色渐变 -->
-    color:#FFD700;font-weight:bold;cursor:pointer;">           <!-- 文字改为金色 -->
+    background:linear-gradient(45deg,#005f8f,#0aa9ff);  <!-- 这里是蓝色渐变 -->
+    color:white;font-weight:bold;cursor:pointer;">
     🌧️ 黑铁员工权限
 </button>
 </div>
@@ -756,6 +756,7 @@ if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
 
 });
 // ✅ 监听在线用户变化
+// ✅ 监听在线用户变化
 import { onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
 const onlineList = document.getElementById("onlineList");
@@ -775,13 +776,16 @@ onValue(onlineUsersRef, (snapshot) => {
       }
 
       const nickname = u.nickname || "(匿名)";
-      const email = u.email || "🟡";
+      const email = u.email || "";
       const realname = u.realname || "";
-// ✅ 当前用户显示🟢，其他用户（包括游客）🟡
-let dot = "🟢";
-if (uid === currentUserId) {
-  dot = "🟢";
-}
+      
+      // ✅ 修复在线状态显示：登录用户🟢，游客🟡
+      let dot = "🟡"; // 默认游客黄色
+      if (uid.startsWith("guest_")) {
+        dot = "🟡"; // 游客黄色
+      } else {
+        dot = "🟢"; // 登录用户绿色
+      }
 
       onlineList.innerHTML += `
         <li style="margin-bottom:8px;">
@@ -794,16 +798,85 @@ if (uid === currentUserId) {
     onlineList.innerHTML = "<li style='color:#aaa;'>暂无用户在线</li>";
   }
 });
-// ✅ 过滤HTML危险字符，防止用户输入<script>或HTML标签
-function sanitize(str) {
-  return str.replace(/[&<>"']/g, s => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[s]));
+// ✅ 页面活动监听 - 任何交互都更新在线状态
+function updateOnlineStatus() {
+  if (!currentUserId) return;
+  
+  const userRef = ref(db, "onlineUsers/" + currentUserId);
+  set(userRef, {
+    nickname: username,
+    email: currentUserId.startsWith("guest_") ? "(游客)" : (auth.currentUser?.email || ""),
+    realname: document.getElementById("userPayName")?.value || "",
+    lastActive: Date.now()
+  });
 }
+
+// 监听各种页面活动
+document.addEventListener('click', updateOnlineStatus);
+document.addEventListener('keydown', updateOnlineStatus);
+document.addEventListener('mousemove', updateOnlineStatus);
+document.addEventListener('touchstart', updateOnlineStatus);
+document.addEventListener('scroll', updateOnlineStatus);
+
+// 定期心跳（每7秒）
+setInterval(updateOnlineStatus, 7000);
+// ✅ 过滤HTML危险字符，防止用户输入<script>或HTML标签
+// ✅ CEO特权检查
+function isCEO() {
+  return window.userVipLevel === "ceo";
+}
+
+// ✅ CEO可以查看所有消息（包括私聊）
+function enableCEOPrivileges() {
+  if (isCEO()) {
+    console.log("👑 CEO特权已启用");
+    // CEO可以绕过所有限制
+    window.sendBroadcast = async function() {
+      const input = document.getElementById("broadcastMsg");
+      const text = input.value.trim();
+      if (!text) return alert("请输入内容！");
+      
+      await push(ref(db, "broadcasts"), {
+        text,
+        time: Date.now(),
+        level: "ceo"
+      });
+
+      await push(ref(db, "messages"), {
+        uid: "SYSTEM_CEO",
+        user: "【服主圣旨】",
+        text,
+        time: Date.now(),
+        avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
+        vipLevel: "ceo",
+        effect: "broadcast"
+      });
+
+      alert("✅ 圣旨已颁布！");
+      input.value = "";
+    };
+  }
+}
+
+// 在VIP等级加载后启用CEO特权
+onAuthStateChanged(authCheck, async (user) => {
+  if (user) {
+    try {
+      const userRef = ref(dbCheck, "users/" + user.uid);
+      const snap = await get(userRef);
+      if (snap.exists()) {
+        const data = snap.val();
+        window.userVipLevel = data.vipLevel || "none";
+        console.log("✅ 当前VIP等级：", window.userVipLevel);
+        
+        // 启用CEO特权
+        enableCEOPrivileges();
+      }
+    } catch (err) {
+      console.error("❌ 获取VIP等级失败：", err);
+    }
+  }
+});
 // ✅ 自动清理消息 - 超过270条删除前200条
 async function autoCleanMessages() {
   try {
