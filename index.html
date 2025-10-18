@@ -530,101 +530,113 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     console.log("✅ 已登录为:", username);
-} else {
-  // ⚠️ 未登录状态（游客进入）
-  loginForm.style.display = "block";
-  userInfo.style.display = "none";
 
-  // 🔎 拉取当前在线用户 + 已注册用户，用于昵称检测
-  const [onlineSnap, usersSnap] = await Promise.all([
-    get(onlineUsersRef),
-    get(ref(db, "users"))
-  ]);
-  const onlineUsers = onlineSnap.exists() ? onlineSnap.val() : {};
-// ✅ 注册在线用户 + 自动心跳（游客或登录用户通用）
-async function registerOnlineUser(user, nickname, isGuest = false) {
-  const id = isGuest ? "guest_" + Math.random().toString(36).substring(2, 10) : user.uid;
-  const userRef = ref(db, "onlineUsers/" + id);
-
-  // 写入在线状态
-  await set(userRef, {
-    nickname,
-    email: isGuest ? "(游客)" : user.email || "",
-    realname: isGuest ? "" : document.getElementById("userPayName")?.value || "",
-    lastActive: Date.now()
-  });
-
-  // 页面关闭或刷新时删除在线状态
-  window.addEventListener("beforeunload", () => remove(userRef));
-
-  // 每 2 秒刷新心跳
-  setInterval(() => {
-    set(userRef, {
-      nickname,
-      email: isGuest ? "(游客)" : user.email || "",
-      realname: isGuest ? "" : document.getElementById("userPayName")?.value || "",
+    // ✅ 注册在线用户信息（登录用户）
+    const userRef = ref(db, "onlineUsers/" + user.uid);
+    await set(userRef, {
+      nickname: username,
+      email: user.email || "",
+      realname: document.getElementById("userPayName")?.value || "",
       lastActive: Date.now()
     });
-  }, 2000);
+    
+    // 页面关闭或刷新时删除在线状态
+    window.addEventListener("beforeunload", () => remove(userRef));
 
-  return id;
-}
+    // 每 2 秒刷新心跳
+    setInterval(() => {
+      set(userRef, {
+        nickname: username,
+        email: user.email || "",
+        realname: document.getElementById("userPayName")?.value || "",
+        lastActive: Date.now()
+      });
+    }, 2000);
 
-  const registeredUsers = usersSnap.exists() ? usersSnap.val() : {};
+  } else {
+    // ⚠️ 未登录状态（游客进入）
+    loginForm.style.display = "block";
+    userInfo.style.display = "none";
 
-  // 🧩 输入昵称（游客）
-  let tempName = prompt("请输入你的昵称（登录后不需要输入，👈导航栏：黑铁VIP注册）")?.trim() || "游客";
+    // ✅ 生成设备指纹（防止同一设备设置多个昵称）
+    const deviceFingerprint = await generateDeviceFingerprint();
+    
+    // ✅ 检查该设备是否已经设置过昵称
+    const deviceUsersRef = ref(db, "deviceUsers/" + deviceFingerprint);
+    const deviceSnap = await get(deviceUsersRef);
+    
+    if (deviceSnap.exists()) {
+      // 该设备已经设置过昵称，直接使用之前的昵称
+      const deviceData = deviceSnap.val();
+      username = deviceData.nickname;
+      currentUserId = deviceData.userId;
+      
+      console.log("🔄 检测到设备已有昵称:", username);
+    } else {
+      // 🔎 拉取当前在线用户 + 已注册用户，用于昵称检测
+      const [onlineSnap, usersSnap] = await Promise.all([
+        get(onlineUsersRef),
+        get(ref(db, "users"))
+      ]);
+      const onlineUsers = onlineSnap.exists() ? onlineSnap.val() : {};
+      const registeredUsers = usersSnap.exists() ? usersSnap.val() : {};
 
-  // 🧩 检查是否重复（在线 or 注册）
-  const duplicateOnline = Object.values(onlineUsers).some(u => u.nickname === tempName);
-  const duplicateRegistered = Object.values(registeredUsers).some(u => u.nickname === tempName);
+      // 🧩 输入昵称（游客）
+      let tempName = prompt("请输入你的昵称（登录后不需要输入，👈导航栏：黑铁VIP注册）")?.trim() || "游客";
 
-  if (duplicateOnline || duplicateRegistered) {
-    alert("⚠️ 该昵称已被黑铁VIP强占，请更换一个昵称！");
-    location.reload(); // 强制刷新重新输入昵称
-    return;
+      // 🧩 检查是否重复（在线 or 注册）
+      const duplicateOnline = Object.values(onlineUsers).some(u => u.nickname === tempName);
+      const duplicateRegistered = Object.values(registeredUsers).some(u => u.nickname === tempName);
+
+      if (duplicateOnline || duplicateRegistered) {
+        alert("⚠️ 该昵称已被黑铁VIP强占，请更换一个昵称！");
+        location.reload(); // 强制刷新重新输入昵称
+        return;
+      }
+
+      // ✅ 昵称通过检测
+      username = tempName;
+      currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
+      
+      // ✅ 保存设备-昵称映射到数据库
+      await set(deviceUsersRef, {
+        nickname: username,
+        userId: currentUserId,
+        deviceFingerprint: deviceFingerprint,
+        firstSeen: Date.now(),
+        lastSeen: Date.now()
+      });
+      
+      console.log("🟡 新游客已加入:", username);
+    }
+
+    document.getElementById("userPhoto").src = defaultAvatar;
+
+    // ✅ 注册在线游客信息
+    const guestRef = ref(db, "onlineUsers/" + currentUserId);
+    await set(guestRef, {
+      nickname: username,
+      email: "(游客)",
+      realname: "",
+      lastActive: Date.now()
+    });
+    
+    // 页面关闭或刷新时删除在线状态
+    window.addEventListener("beforeunload", () => remove(guestRef));
+
+    // 每 2 秒刷新心跳
+    setInterval(() => {
+      set(guestRef, {
+        nickname: username,
+        email: "(游客)",
+        realname: "",
+        lastActive: Date.now()
+      });
+    }, 2000);
+
+    console.log("🟡 游客已加入:", username);
   }
 
-  // ✅ 昵称通过检测
-  username = tempName;
-  currentUserId = "guest_" + Math.random().toString(36).substring(2, 10);
-  document.getElementById("userPhoto").src = defaultAvatar;
-
-  // ✅ 注册在线游客信息
-  const guestRef = ref(db, "onlineUsers/" + currentUserId);
-  await set(guestRef, {
-    nickname: username,
-    email: "(游客)",
-    realname: "",
-    lastActive: Date.now()
-  });
-  window.addEventListener("beforeunload", () => remove(guestRef));
-
-  console.log("🟡 游客已加入:", username);
-}
-
-// ✅ 注册在线用户信息
-if (user) {
-  const userRef = ref(db, "onlineUsers/" + user.uid);
-  await set(userRef, {
-    nickname: username,
-    email: user.email || "",
-    realname: document.getElementById("userPayName")?.value || "",
-    lastActive: Date.now()
-  });
-  // 页面关闭或刷新时删除在线状态
-  window.addEventListener("beforeunload", () => remove(userRef));
-} else {
-  const guestId = currentUserId;
-  const guestRef = ref(db, "onlineUsers/" + guestId);
-  await set(guestRef, {
-    nickname: username,
-    email: "(游客)",
-    realname: "",
-    lastActive: Date.now()
-  });
-  window.addEventListener("beforeunload", () => remove(guestRef));
-}
   usernameReady = true;
 });
 // --- 新消息提醒 & “不在底部不自动滚动” ---
@@ -1607,6 +1619,52 @@ window.addEventListener("load", () => {
   });
   }, 1000); // ⏳ 延迟 1 秒再检测登录状态
 });
+	// ✅ 生成设备指纹函数
+async function generateDeviceFingerprint() {
+  const components = [];
+  
+  // 用户代理
+  components.push(navigator.userAgent);
+  
+  // 语言
+  components.push(navigator.language);
+  
+  // 时区
+  components.push(new Date().getTimezoneOffset());
+  
+  // 屏幕信息
+  components.push(screen.width + 'x' + screen.height + 'x' + screen.colorDepth);
+  
+  // 硬件并发数
+  components.push(navigator.hardwareConcurrency || 'unknown');
+  
+  // 设备内存
+  components.push(navigator.deviceMemory || 'unknown');
+  
+  // Canvas 指纹
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#f60';
+  ctx.fillRect(125, 1, 62, 20);
+  ctx.fillStyle = '#069';
+  ctx.fillText('Fingerprint', 2, 15);
+  ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+  ctx.fillText('Fingerprint', 4, 17);
+  const canvasData = canvas.toDataURL();
+  components.push(canvasData);
+  
+  // 组合所有组件并生成哈希
+  const fingerprintString = components.join('|');
+  const encoder = new TextEncoder();
+  const data = encoder.encode(fingerprintString);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const fingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return fingerprint;
+}
 </script>
         </body>
         </html>
