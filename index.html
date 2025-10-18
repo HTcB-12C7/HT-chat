@@ -1030,6 +1030,52 @@ document.getElementById("saveBtn").onclick = async () => {
   document.getElementById("userPhoto").src = avatarURL;
   alert("信息已保存！");
 };
+	// ✅ 生成设备指纹函数
+async function generateDeviceFingerprint() {
+  const components = [];
+  
+  // 用户代理
+  components.push(navigator.userAgent);
+  
+  // 语言
+  components.push(navigator.language);
+  
+  // 时区
+  components.push(new Date().getTimezoneOffset());
+  
+  // 屏幕信息
+  components.push(screen.width + 'x' + screen.height + 'x' + screen.colorDepth);
+  
+  // 硬件并发数
+  components.push(navigator.hardwareConcurrency || 'unknown');
+  
+  // 设备内存
+  components.push(navigator.deviceMemory || 'unknown');
+  
+  // Canvas 指纹
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#f60';
+  ctx.fillRect(125, 1, 62, 20);
+  ctx.fillStyle = '#069';
+  ctx.fillText('Fingerprint', 2, 15);
+  ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+  ctx.fillText('Fingerprint', 4, 17);
+  const canvasData = canvas.toDataURL();
+  components.push(canvasData);
+  
+  // 组合所有组件并生成哈希
+  const fingerprintString = components.join('|');
+  const encoder = new TextEncoder();
+  const data = encoder.encode(fingerprintString);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const fingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return fingerprint;
+}
 </script>
 <script type="module">
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -1619,52 +1665,6 @@ window.addEventListener("load", () => {
   });
   }, 1000); // ⏳ 延迟 1 秒再检测登录状态
 });
-	// ✅ 生成设备指纹函数
-async function generateDeviceFingerprint() {
-  const components = [];
-  
-  // 用户代理
-  components.push(navigator.userAgent);
-  
-  // 语言
-  components.push(navigator.language);
-  
-  // 时区
-  components.push(new Date().getTimezoneOffset());
-  
-  // 屏幕信息
-  components.push(screen.width + 'x' + screen.height + 'x' + screen.colorDepth);
-  
-  // 硬件并发数
-  components.push(navigator.hardwareConcurrency || 'unknown');
-  
-  // 设备内存
-  components.push(navigator.deviceMemory || 'unknown');
-  
-  // Canvas 指纹
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.textBaseline = 'top';
-  ctx.font = '14px Arial';
-  ctx.fillStyle = '#f60';
-  ctx.fillRect(125, 1, 62, 20);
-  ctx.fillStyle = '#069';
-  ctx.fillText('Fingerprint', 2, 15);
-  ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-  ctx.fillText('Fingerprint', 4, 17);
-  const canvasData = canvas.toDataURL();
-  components.push(canvasData);
-  
-  // 组合所有组件并生成哈希
-  const fingerprintString = components.join('|');
-  const encoder = new TextEncoder();
-  const data = encoder.encode(fingerprintString);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const fingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
-  return fingerprint;
-}
 </script>
         </body>
         </html>
