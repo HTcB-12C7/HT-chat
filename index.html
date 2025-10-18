@@ -759,7 +759,6 @@ if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
   showBroadcast(msgData.text);
   return; // 不把广播加进普通聊天框
 }
-
 });
 // ✅ 监听在线用户变化
 // ✅ 监听在线用户变化
@@ -937,7 +936,7 @@ window.sendMsg = async function () {
     // 确保 VIP 状态稳定（避免 null）
 const vipLevelToSend = window.userVipLevel || "none";
 
-    // ✅ 核心发送逻辑
+// ✅ 核心发送逻辑
 await push(messagesRef, {
   uid: currentUserId,
   user: username,
@@ -945,7 +944,7 @@ await push(messagesRef, {
   time: Date.now(),
   avatar: avatarURL,
   vipLevel: vipLevelToSend,
-  effect: window.activeEffect || "none"
+  effect: window.activeEffect || "none"  // 添加这一行
 });
 
     // 清空输入框
