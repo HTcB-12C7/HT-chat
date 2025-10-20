@@ -729,7 +729,19 @@ else if (level === "ceo") {
     animation: glow 2s ease-in-out infinite;
   ">黑铁CEO</span>`;
 } 
-	
+// 添加 LPOJ 等级 - 黑铁老赖
+else if (level === "LPOJ") {
+  levelTag = `<span style="
+    background: linear-gradient(45deg, #8B0000, #B22222, #DC143C);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);  // 更亮的红色阴影
+    border: 1px solid #FF0000;  // 鲜艳红色边框
+    padding: 2px 6px;
+    border-radius: 4px;
+  ">黑铁老赖</span>`;
+}
 const wasAtBottom = isNearBottom(chatBox);   // 追加前，先判断是否在底部
 
 const msgHtml = `
