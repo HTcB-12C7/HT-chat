@@ -1709,14 +1709,23 @@ window.addEventListener("load", () => {
         if (!snap.exists()) return;
 
         const vipLevel = snap.val().vipLevel?.toLowerCase() || "none";
-        if (vipLevel === "staff" || vipLevel === "ceo") {
-          broadcastInput.disabled = false;
-          sendBtn.disabled = false;
-          sendBtn.style.opacity = "1";
-          sendBtn.style.cursor = "pointer";
-          sendBtn.textContent = vipLevel === "ceo" ? "📜 服主圣旨" : "📢 全服广播";
-          broadcastInput.placeholder = vipLevel === "ceo" ? "输入圣旨内容..." : "输入广播内容...";
-        }
+if ((vipLevel === "staff" || vipLevel === "ceo") && vipLevel !== "LPOJ") {
+  broadcastInput.disabled = false;
+  sendBtn.disabled = false;
+  sendBtn.style.opacity = "1";
+  sendBtn.style.cursor = "pointer";
+  sendBtn.textContent = vipLevel === "ceo" ? "📜 服主圣旨" : "📢 全服广播";
+  broadcastInput.placeholder = vipLevel === "ceo" ? "输入圣旨内容..." : "输入广播内容...";
+} else if (vipLevel === "LPOJ") {
+  // 🚫 黑铁老赖专属禁止提示
+  broadcastInput.disabled = true;
+  sendBtn.disabled = true;
+  sendBtn.style.opacity = "0.4";
+  sendBtn.style.cursor = "not-allowed";
+  sendBtn.textContent = "🚫 老赖禁令中";
+  broadcastInput.placeholder = "黑铁老赖无法使用广播功能";
+}
+
       } catch (err) {
         console.error("❌ 获取VIP信息失败：", err);
       }
