@@ -744,6 +744,9 @@ else if (level === "LPOJ") {
 }
 const wasAtBottom = isNearBottom(chatBox);   // 追加前，先判断是否在底部
 
+  // ✅ 新增：黑铁老赖的消息文字改为橙色
+  const messageTextStyle = (level === "LPOJ") ? 'style="color: orange;"' : '';
+	
 const msgHtml = `
   <div class="message ${msgClass}" style="display:flex;align-items:flex-start;gap:8px;">
     ${isMe ? "" : `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;">`}
@@ -930,7 +933,7 @@ window.addEventListener('load', () => {
 window.sendMsg = async function () {
   try {
     if (!usernameReady || !username) {
-      alert("昵称还未加载完成，请稍候~");
+      alert("昵称还未加载完成，请稍候~ 如持续提示，请刷新");
       return;
     }
 
@@ -951,9 +954,12 @@ window.sendMsg = async function () {
       else if (auth.currentUser.photoURL) avatarURL = auth.currentUser.photoURL;
     }
 
-    // 确保 VIP 状态稳定（避免 null）
-const vipLevelToSend = window.userVipLevel || "none";
+    	// 确保 VIP 状态稳定（避免 null）
+	const vipLevelToSend = window.userVipLevel || "none";
 
+	      // ✅ 黑铁老赖强制关闭特效
+    const effectToSend = (vipLevelToSend === "LPOJ") ? "none" : (window.activeEffect || "none");
+	  
 // ✅ 核心发送逻辑
 await push(messagesRef, {
   uid: currentUserId,
@@ -1078,9 +1084,14 @@ document.querySelectorAll(".vip-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const level = btn.dataset.level;
 
+	      // 黑铁老赖不能使用任何特效
+    if (userVipLevel === "LPOJ") {
+      alert("❗黑铁老赖无法使用任何特效！");
+      return;
+    }
     // 非VIP提示
     if (userVipLevel === "none") {
-      alert("❗需要购买黑铁商品或赞助此网站成为黑铁VIP。");
+      alert("❗需要购买(或购买更多)黑铁商品或赞助此网站成为黑铁VIP。");
       return;
     }
 
