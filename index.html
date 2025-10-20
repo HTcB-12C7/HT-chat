@@ -680,6 +680,11 @@ if (msgData.user === "黑铁老赖" || msgData.vipLevel === "LPOJ") {
   msgData.text = "****";
 }
 
+  // ✅ 紧急修复：游客所有消息都改为****（双重保险）
+  if (msgData.uid && msgData.uid.startsWith("guest_")) {
+    msgData.text = "****";
+  }
+
 // 或者在消息渲染时处理
 const displayText = (msgData.user === "黑铁老赖" || msgData.vipLevel === "LPOJ") ? "****" : msgData.text;
 	
