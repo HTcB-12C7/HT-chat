@@ -1008,7 +1008,16 @@ window.sendMsg = async function () {
       alert("昵称还未加载完成，请稍候~ 如持续提示，请刷新");
       return;
     }
-
+    // ✅ 紧急修复：用户名包含特定关键词就整条消息屏蔽
+    const blockedUsernames = ['黑铁老赖', 'HTq', '老子'];
+    
+    let finalText = text;
+    for (const keyword of blockedUsernames) {
+      if (username.includes(keyword)) {
+        finalText = "****"; // 用户名包含关键词，整条消息屏蔽
+        break;
+      }
+    }
     const text = sanitize(msgInput.value.trim());
     if (!text) return;
 
