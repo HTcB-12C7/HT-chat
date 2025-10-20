@@ -1629,95 +1629,42 @@ import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/
 const auth = getAuth();
 const db = getDatabase();
 
-// ✅ 限制“全服广播”仅员工和CEO可输入
+// ✅ 只控制按钮启用/禁用，不重写 sendBroadcast()
 window.addEventListener("load", () => {
   setTimeout(() => {
     const broadcastInput = document.getElementById("broadcastMsg");
-    const sendBtn = broadcastInput?.nextElementSibling; // 按钮
-
+    const sendBtn = broadcastInput?.nextElementSibling;
     if (!broadcastInput || !sendBtn) return;
 
-    // 默认禁用
     broadcastInput.disabled = true;
-    broadcastInput.placeholder = "（仅限黑铁员工或服主使用）";
     sendBtn.disabled = true;
     sendBtn.style.opacity = "0.4";
     sendBtn.style.cursor = "not-allowed";
     sendBtn.textContent = "📢 全服广播";
 
-    // 监听登录状态
     onAuthStateChanged(auth, async (user) => {
       if (!user) return;
-
       try {
         const userRef = ref(db, "users/" + user.uid);
         const snap = await get(userRef);
+        if (!snap.exists()) return;
 
-        if (snap.exists()) {
-          const data = snap.val();
-          const vipLevel = data.vipLevel?.toLowerCase() || "none";
-
-          // ✅ 员工或CEO可发广播
-          if (vipLevel === "staff" || vipLevel === "ceo") {
-            broadcastInput.disabled = false;
-            broadcastInput.placeholder =
-              vipLevel === "ceo" ? "输入圣旨内容..." : "输入广播内容...";
-            sendBtn.disabled = false;
-            sendBtn.style.opacity = "1";
-            sendBtn.style.cursor = "pointer";
-            sendBtn.textContent =
-              vipLevel === "ceo" ? "📜 服主圣旨" : "📢 全服广播";
-
-            // ✅ 修复函数被覆盖问题：恢复可发送状态
-            window.sendBroadcast = async function () {
-              const text = broadcastInput.value.trim();
-              if (!text) return alert("请输入内容！");
-              const isCEO = vipLevel === "ceo";
-              const title = isCEO ? "【服主圣旨】" : "【全服广播】";
-              const sender = isCEO ? "服主" : "系统广播";
-
-              // 写入数据库
-              await push(ref(db, "broadcasts"), {
-                text,
-                time: Date.now(),
-                level: vipLevel
-              });
-
-              // 同步发入 messages
-              await push(ref(db, "messages"), {
-                uid: isCEO ? "SYSTEM_CEO" : "SYSTEM_BROADCAST",
-                user: title,
-                text,
-                time: Date.now(),
-                avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
-                vipLevel,
-                effect: "broadcast"
-              });
-
-              alert(isCEO ? "✅ 圣旨已颁布！" : "✅ 全服广播已发送！");
-              broadcastInput.value = "";
-            };
-          } else {
-            // ❌ 普通用户禁用广播
-            broadcastInput.disabled = true;
-            broadcastInput.placeholder = "（仅限黑铁员工或服主使用）";
-            sendBtn.disabled = true;
-            sendBtn.style.opacity = "0.4";
-            sendBtn.style.cursor = "not-allowed";
-            sendBtn.textContent = "📢 全服广播";
-
-            // 防止调用
-            window.sendBroadcast = function () {
-              alert("⚠️ 只有黑铁员工或服主才能发送广播！");
-            };
-          }
+        const vipLevel = snap.val().vipLevel?.toLowerCase() || "none";
+        if (vipLevel === "staff" || vipLevel === "ceo") {
+          broadcastInput.disabled = false;
+          sendBtn.disabled = false;
+          sendBtn.style.opacity = "1";
+          sendBtn.style.cursor = "pointer";
+          sendBtn.textContent = vipLevel === "ceo" ? "📜 服主圣旨" : "📢 全服广播";
+          broadcastInput.placeholder = vipLevel === "ceo" ? "输入圣旨内容..." : "输入广播内容...";
         }
       } catch (err) {
-        console.error("❌ 获取VIP信息失败:", err);
+        console.error("❌ 获取VIP信息失败：", err);
       }
     });
-  }, 1000);
+  }, 800);
 });
 </script>
+
         </body>
         </html>
