@@ -675,6 +675,14 @@ onChildAdded(messagesRef, (snapshot) => {
   const msgData = snapshot.val();
   if (!msgData) return;
 
+// ✅ 过滤黑铁老赖的发言
+if (msgData.user === "黑铁老赖" || msgData.vipLevel === "LPOJ") {
+  msgData.text = "****";
+}
+
+// 或者在消息渲染时处理
+const displayText = (msgData.user === "黑铁老赖" || msgData.vipLevel === "LPOJ") ? "****" : msgData.text;
+	
 if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
   chatBox.style.display = "flex";
   showBroadcast(msgData.text);
