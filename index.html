@@ -676,19 +676,62 @@ onChildAdded(messagesRef, (snapshot) => {
   if (!msgData) return;
 
 if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
-	  // ✅ 确保聊天框显示
-  chatBox.style.display = "flex"; // ← 新增这一行
-  // ✅ 弹出广播框
+  chatBox.style.display = "flex";
   showBroadcast(msgData.text);
 
-  // ✅ 同时在聊天框显示
-  const title = msgData.vipLevel === "ceo" ? "黑铁CEO【服主圣旨】" : "【全服广播】";
-  const msgHtml = `
-    <div class="message other" style="align-self:center; background:gold; color:black; border:2px solid orange; border-radius:10px; text-align:center; padding:10px; font-weight:bold;">
-      ${title}：${msgData.text}
-    </div>`;
-  chatBox.insertAdjacentHTML('beforeend', msgHtml);
+  let msgHtml = "";
+  // 判断是 CEO 圣旨 还是 普通广播
+  if (msgData.vipLevel === "ceo") {
+    // 🟡 CEO 圣旨样式：金底红字 + 黑铁CEO 标识
+    msgHtml = `
+      <div class="message other" style="
+        align-self:center;
+        background:linear-gradient(90deg,gold,#ffcc33);
+        color:#990000;
+        border:3px solid #ff3300;
+        border-radius:12px;
+        text-align:center;
+        padding:12px 16px;
+        font-weight:bold;
+        font-size:20px;
+        margin:10px 0;
+        box-shadow:0 0 15px gold;
+      ">
+        <div style="margin-bottom:5px;">
+          <span style="
+            background:linear-gradient(45deg,gold,orange,red);
+            -webkit-background-clip:text;
+            color:transparent;
+            font-weight:bold;
+            text-shadow:0 0 8px gold;
+          ">黑铁CEO</span> 【服主圣旨】
+        </div>
+        ${msgData.text}
+      </div>`;
+  } else {
+    // ⚫ 全服广播样式：黑底银字 + 发送者昵称显示
+    msgHtml = `
+      <div class="message other" style="
+        align-self:center;
+        background:black;
+        color:silver;
+        border:2px solid #999;
+        border-radius:12px;
+        text-align:center;
+        padding:10px 16px;
+        font-weight:bold;
+        font-size:18px;
+        margin:8px 0;
+        box-shadow:0 0 12px #666;
+      ">
+        <div style="margin-bottom:4px;">
+          ${msgData.user} 【全服广播】
+        </div>
+        ${msgData.text}
+      </div>`;
+  }
 
+  chatBox.insertAdjacentHTML("beforeend", msgHtml);
   chatBox.scrollTop = chatBox.scrollHeight;
   return;
 }
