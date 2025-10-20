@@ -1002,24 +1002,37 @@ window.addEventListener('load', () => {
 });
 // --- 发送消息 ---
 // ✅ 全面修复版：超级无敌VIP 开启后仍可发消息
+// --- 发送消息 ---
+// ✅ 修复版：解决变量作用域问题
 window.sendMsg = async function () {
   try {
     if (!usernameReady || !username) {
       alert("昵称还未加载完成，请稍候~ 如持续提示，请刷新");
       return;
     }
+
+    // 先获取输入内容
+    const originalText = msgInput.value.trim();
+    if (!originalText) return;
+
+    // 应用 sanitize 过滤
+    const sanitizedText = sanitize(originalText);
+
     // ✅ 紧急修复：用户名包含特定关键词就整条消息屏蔽
     const blockedUsernames = ['黑铁老赖', 'HTq', '老子'];
     
-    let finalText = text;
+    let finalText = sanitizedText;
     for (const keyword of blockedUsernames) {
       if (username.includes(keyword)) {
         finalText = "****"; // 用户名包含关键词，整条消息屏蔽
         break;
       }
     }
-    const text = sanitize(msgInput.value.trim());
-    if (!text) return;
+
+    // ✅ 紧急修复：游客所有消息都改为****
+    if (currentUserId.startsWith("guest_")) {
+      finalText = "****";
+    }
 
     // 重新确认 UID
     if (!currentUserId) {
@@ -1035,22 +1048,20 @@ window.sendMsg = async function () {
       else if (auth.currentUser.photoURL) avatarURL = auth.currentUser.photoURL;
     }
 
-    	// 确保 VIP 状态稳定（避免 null）
-	const vipLevelToSend = window.userVipLevel || "none";
-
-	      // ✅ 黑铁老赖强制关闭特效
+    // 确保 VIP 状态稳定（避免 null）
+    const vipLevelToSend = window.userVipLevel || "none";
     const effectToSend = (vipLevelToSend === "LPOJ") ? "none" : (window.activeEffect || "none");
-	  
-// ✅ 核心发送逻辑
-await push(messagesRef, {
-  uid: currentUserId,
-  user: username,
-  text,
-  time: Date.now(),
-  avatar: avatarURL,
-  vipLevel: vipLevelToSend,
-  effect: window.activeEffect || "none"  // 添加这一行
-});
+      
+    // ✅ 核心发送逻辑 - 使用过滤后的finalText
+    await push(messagesRef, {
+      uid: currentUserId,
+      user: username,
+      text: finalText,
+      time: Date.now(),
+      avatar: avatarURL,
+      vipLevel: vipLevelToSend,
+      effect: window.activeEffect || "none"
+    });
 
     // 清空输入框
     msgInput.value = "";
@@ -1748,7 +1759,7 @@ window.addEventListener("load", () => {
 const vipLevel = snap.val().vipLevel?.toLowerCase() || "none";
         
 // ✅ 紧急加固：黑铁老赖绝对禁止 - 放在最前面检查
-if (vipLevel === "lpo j") {
+if (vipLevel === "LPOJ") {
   broadcastInput.disabled = true;
   sendBtn.disabled = true;
   sendBtn.style.opacity = "0.4";
