@@ -710,25 +710,27 @@ if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
       </div>`;
   } else {
     // ⚫ 全服广播样式：黑底银字 + 发送者昵称显示
-    msgHtml = `
-      <div class="message other" style="
-        align-self:center;
-        background:black;
-        color:silver;
-        border:2px solid #999;
-        border-radius:12px;
-        text-align:center;
-        padding:10px 16px;
-        font-weight:bold;
-        font-size:18px;
-        margin:8px 0;
-        box-shadow:0 0 12px #666;
-      ">
-        <div style="margin-bottom:4px;">
-          ${msgData.user} 【全服广播】
-        </div>
-        ${msgData.text}
-      </div>`;
+// ⚪ 全服广播样式：黑底银字 + 白色边框 + 显示真实发送者昵称
+msgHtml = `
+  <div class="message other" style="
+    align-self:center;
+    background:black;
+    color:silver;
+    border:2px solid white;          /* ✅ 改为白色外框 */
+    border-radius:12px;
+    text-align:center;
+    padding:10px 16px;
+    font-weight:bold;
+    font-size:18px;
+    margin:8px 0;
+    box-shadow:0 0 12px #999;
+  ">
+    <div style="margin-bottom:4px;">
+      ${msgData.senderName || msgData.user || "黑铁员工"} 【全服广播】   /* ✅ 显示真实昵称 */
+    </div>
+    ${msgData.text}
+  </div>`;
+
   }
 
   chatBox.insertAdjacentHTML("beforeend", msgHtml);
@@ -1634,8 +1636,8 @@ window.sendBroadcast = async function () {
   }
 
   const isCEO = userLevel === "ceo";
-  const broadcastTitle = isCEO ? "【服主圣旨】" : "【全服广播】";
-  const userName = isCEO ? "服主" : "全服广播";
+const broadcastTitle = isCEO ? "【服主圣旨】" : "【全服广播】";
+const userName = username || (isCEO ? "服主" : "黑铁员工");  // ✅ 保存真实发送者昵称
 
   await push(ref(db, "broadcasts"), {
     text,
@@ -1647,6 +1649,7 @@ window.sendBroadcast = async function () {
   await push(ref(db, "messages"), {
     uid: isCEO ? "SYSTEM_CEO" : "SYSTEM_BROADCAST",
     user: broadcastTitle,
+	senderName: username,          // ✅ 新增
     text,
     time: Date.now(),
     avatar: "https://htcb-12c7.github.io/htgov/assets/HTgovIconV2.png",
