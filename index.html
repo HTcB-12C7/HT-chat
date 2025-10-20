@@ -674,6 +674,25 @@ chatBox.addEventListener('scroll', () => {
 onChildAdded(messagesRef, (snapshot) => {
   const msgData = snapshot.val();
   if (!msgData) return;
+
+if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
+	  // ✅ 确保聊天框显示
+  chatBox.style.display = "flex"; // ← 新增这一行
+  // ✅ 弹出广播框
+  showBroadcast(msgData.text);
+
+  // ✅ 同时在聊天框显示
+  const title = msgData.vipLevel === "ceo" ? "黑铁CEO【服主圣旨】" : "【全服广播】";
+  const msgHtml = `
+    <div class="message other" style="align-self:center; background:gold; color:black; border:2px solid orange; border-radius:10px; text-align:center; padding:10px; font-weight:bold;">
+      ${title}：${msgData.text}
+    </div>`;
+  chatBox.insertAdjacentHTML('beforeend', msgHtml);
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+  return;
+}
+	
   const time = new Date(msgData.time).toLocaleTimeString();
   const isMe = msgData.uid === currentUserId;
   const msgClass = isMe ? "me" : "other";
@@ -775,23 +794,6 @@ if (msgData.uid !== currentUserId && msgData.effect && msgData.effect !== "none"
   
   // ✅ 特效永久显示 - 不自动清除
   // 删除 setTimeout 清除代码
-}
-if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
-	  // ✅ 确保聊天框显示
-  chatBox.style.display = "flex"; // ← 新增这一行
-  // ✅ 弹出广播框
-  showBroadcast(msgData.text);
-
-  // ✅ 同时在聊天框显示
-  const title = msgData.vipLevel === "ceo" ? "黑铁CEO【服主圣旨】" : "【全服广播】";
-  const msgHtml = `
-    <div class="message other" style="align-self:center; background:gold; color:black; border:2px solid orange; border-radius:10px; text-align:center; padding:10px; font-weight:bold;">
-      ${title}：${msgData.text}
-    </div>`;
-  chatBox.insertAdjacentHTML('beforeend', msgHtml);
-
-  chatBox.scrollTop = chatBox.scrollHeight;
-  return;
 }
 
 });
