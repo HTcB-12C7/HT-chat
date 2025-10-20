@@ -777,6 +777,8 @@ if (msgData.uid !== currentUserId && msgData.effect && msgData.effect !== "none"
   // 删除 setTimeout 清除代码
 }
 if (msgData.uid === "SYSTEM_BROADCAST" || msgData.effect === "broadcast") {
+	  // ✅ 确保聊天框显示
+  chatBox.style.display = "flex"; // ← 新增这一行
   // ✅ 弹出广播框
   showBroadcast(msgData.text);
 
