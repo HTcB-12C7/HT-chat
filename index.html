@@ -1627,7 +1627,22 @@ window.sendBroadcast = async function () {
 
   const user = auth.currentUser;
   if (!user) return;
-
+  // ✅ 紧急修复：硬性禁止黑铁老赖发送任何广播
+  // 直接从数据库获取最新用户状态，避免缓存问题
+  try {
+    const userRef = ref(db, "users/" + user.uid);
+    const snap = await get(userRef);
+    if (snap.exists()) {
+      const userData = snap.val();
+      if (userData.vipLevel === "LPOJ") {
+        alert("🚫 黑铁老赖禁止使用广播功能！");
+        input.value = "";
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("❌ 检查用户状态失败：", err);
+  }
   // 获取用户VIP等级
   let userLevel = "none";
   try {
@@ -1716,22 +1731,26 @@ window.addEventListener("load", () => {
         const snap = await get(userRef);
         if (!snap.exists()) return;
 
-        const vipLevel = snap.val().vipLevel?.toLowerCase() || "none";
-if ((vipLevel === "staff" || vipLevel === "ceo") && vipLevel !== "LPOJ") {
-  broadcastInput.disabled = false;
-  sendBtn.disabled = false;
-  sendBtn.style.opacity = "1";
-  sendBtn.style.cursor = "pointer";
-  sendBtn.textContent = vipLevel === "ceo" ? "📜 服主圣旨" : "📢 全服广播";
-  broadcastInput.placeholder = vipLevel === "ceo" ? "输入圣旨内容..." : "输入广播内容...";
-} else if (vipLevel === "LPOJ") {
-  // 🚫 黑铁老赖专属禁止提示
+const vipLevel = snap.val().vipLevel?.toLowerCase() || "none";
+        
+// ✅ 紧急加固：黑铁老赖绝对禁止 - 放在最前面检查
+if (vipLevel === "lpo j") {
   broadcastInput.disabled = true;
   sendBtn.disabled = true;
   sendBtn.style.opacity = "0.4";
   sendBtn.style.cursor = "not-allowed";
   sendBtn.textContent = "🚫 老赖禁令中";
   broadcastInput.placeholder = "黑铁老赖无法使用广播功能";
+  return; // 直接返回，不执行后续逻辑
+}
+
+if (vipLevel === "staff" || vipLevel === "ceo") {
+  broadcastInput.disabled = false;
+  sendBtn.disabled = false;
+  sendBtn.style.opacity = "1";
+  sendBtn.style.cursor = "pointer";
+  sendBtn.textContent = vipLevel === "ceo" ? "📜 服主圣旨" : "📢 全服广播";
+  broadcastInput.placeholder = vipLevel === "ceo" ? "输入圣旨内容..." : "输入广播内容...";
 }
 
       } catch (err) {
